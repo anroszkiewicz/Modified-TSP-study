@@ -472,9 +472,9 @@ double calculateSolutionScore(const Solution &solution, const std::vector<std::v
     return cycle1Distance + cycle2Distance;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    std::string filepath = "TSPlib95/kroB200.tsp";
+    std::string filepath = argv[1];
     std::vector<Point> points = loadPointsFromFile(filepath);
     if (points.empty())
     {
@@ -500,11 +500,17 @@ int main()
     double totalGreedyCycleScore = 0.0;
     Solution bestGreedyCycleSolution;
 
-    // RegretCycleWeighted Algorithm
+    // RegretCycle Algorithm
     double minRegretCycleScore = std::numeric_limits<double>::max();
     double maxRegretCycleScore = std::numeric_limits<double>::lowest();
     double totalRegretCycleScore = 0.0;
     Solution bestRegretCycleSolution;
+
+    // RegretCycleWeighted Algorithm
+    double minWeightedRegretCycleScore = std::numeric_limits<double>::max();
+    double maxWeightedRegretCycleScore = std::numeric_limits<double>::lowest();
+    double totalWeightedRegretCycleScore = 0.0;
+    Solution bestWeightedRegretCycleSolution;
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
@@ -538,18 +544,32 @@ int main()
             bestGreedyCycleSolution = solution2;
         }
 
-        // Apply regretCycleWeighted algorithm
+        // Apply regretCycle algorithm
         Solution solution3 = regretCycleWeighted(distanceMatrix, 0.0, 1.0);
         double regretCycleScore = calculateSolutionScore(solution3, distanceMatrix);
         minRegretCycleScore = std::min(minRegretCycleScore, regretCycleScore);
         maxRegretCycleScore = std::max(maxRegretCycleScore, regretCycleScore);
         totalRegretCycleScore += regretCycleScore;
 
-        // Check for best solution for RegretCycleWeighted
+        // Check for best solution for RegretCycle
         if (regretCycleScore == minRegretCycleScore)
         {
             minRegretCycleScore = regretCycleScore;
             bestRegretCycleSolution = solution3;
+        }
+
+        // Apply regretCycleWeighted algorithm
+        Solution solution4 = regretCycleWeighted(distanceMatrix, 1.0, 1.0);
+        double weightedRegretCycleScore = calculateSolutionScore(solution4, distanceMatrix);
+        minWeightedRegretCycleScore = std::min(minWeightedRegretCycleScore, weightedRegretCycleScore);
+        maxWeightedRegretCycleScore = std::max(maxWeightedRegretCycleScore, weightedRegretCycleScore);
+        totalWeightedRegretCycleScore += weightedRegretCycleScore;
+
+        // Check for best solution for RegretCycleWeighted
+        if (weightedRegretCycleScore == minWeightedRegretCycleScore)
+        {
+            minWeightedRegretCycleScore = weightedRegretCycleScore;
+            bestWeightedRegretCycleSolution = solution4;
         }
     }
 
@@ -557,6 +577,7 @@ int main()
     double avgGreedyNNScore = totalGreedyNNScore / iterations;
     double avgGreedyCycleScore = totalGreedyCycleScore / iterations;
     double avgRegretCycleScore = totalRegretCycleScore / iterations;
+    double avgWeightedRegretCycleScore = totalWeightedRegretCycleScore / iterations;
 
     // Print results for each algorithm
     std::cout << "\nGreedyNearestNeighbour Algorithm Results:" << std::endl;
@@ -569,10 +590,15 @@ int main()
     std::cout << "Max Score: " << maxGreedyCycleScore << std::endl;
     std::cout << "Average Score: " << avgGreedyCycleScore << std::endl;
 
-    std::cout << "\nRegretCycleWeighted Algorithm Results:" << std::endl;
+    std::cout << "\nRegretCycle Algorithm Results:" << std::endl;
     std::cout << "Min Score: " << minRegretCycleScore << std::endl;
     std::cout << "Max Score: " << maxRegretCycleScore << std::endl;
     std::cout << "Average Score: " << avgRegretCycleScore << std::endl;
+
+    std::cout << "\nRegretCycleWeighted Algorithm Results:" << std::endl;
+    std::cout << "Min Score: " << minWeightedRegretCycleScore << std::endl;
+    std::cout << "Max Score: " << maxWeightedRegretCycleScore << std::endl;
+    std::cout << "Average Score: " << avgWeightedRegretCycleScore << std::endl;
 
     // Plot best solutions for each algorithm
     std::cout << "\nPlotting Best Solutions:" << std::endl;
@@ -583,8 +609,11 @@ int main()
     std::cout << "Best GreedyCycle Solution:" << std::endl;
     plotSolution(bestGreedyCycleSolution, points, distanceMatrix);
 
-    std::cout << "Best RegretCycleWeighted Solution:" << std::endl;
+    std::cout << "Best RegretCycle Solution:" << std::endl;
     plotSolution(bestRegretCycleSolution, points, distanceMatrix);
+
+    std::cout << "Best RegretCycleWeighted Solution:" << std::endl;
+    plotSolution(bestWeightedRegretCycleSolution, points, distanceMatrix);
 
     return 0;
 }

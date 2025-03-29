@@ -661,137 +661,96 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
     return solution;
 }
 
-// bool stepPointExchange(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, const std::string &strategy)
-// {
-//     bool foundStep = false;
-//     size_t numberOfPoints = distanceMatrix.size();
-//     size_t pointsSolution1 = solution.cycleIndices[0].size();
-//     size_t pointsSolution2 = solution.cycleIndices[1].size();
+bool stepPointExchange(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, const std::string &strategy)
+{
+    bool foundStep = false;
+    size_t numberOfPoints = distanceMatrix.size();
+    size_t pointsInCycle1 = solution.cycleIndices[0].size(); // Size of first cycle
+    size_t pointsInCycle2 = solution.cycleIndices[1].size(); // Size of second cycle
 
-//     double minDelta = std::numeric_limits<double>::max();
+    std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
 
-//     // Loop over each pair of points in the solution
-//     for (size_t i = 0; i < numberOfPoints; ++i)
-//     {
-//         for (size_t j = i + 1; j < numberOfPoints; ++j)
-//         {
-//             int cyclePoint1 = -1;
-//             int cyclePoint2 = -1;
-//             // Calculate how much can we gain by swapping these 2 points
-//             double delta = 0;
-//             int point1;
-//             int point2;
-//             // Get all the neighbours of point 1
-//             int next1;
-//             int prev1;
-//             if (i < pointsSolution1)
-//             {
-//                 cyclePoint1 = 1;
-//                 point1 = solution.cycleIndices[0][i];
-//                 next1 = solution.cycleIndices[0][(i + 1) % pointsSolution1];
-//                 prev1 = solution.cycleIndices[0][(i - 1 + pointsSolution1) % pointsSolution1]
-//             }
-//             else
-//             {
-//                 cyclePoint1 = 2;
-//                 // Calculate where this point is in cycle2
-//                 int i2 = i - pointsSolution1;
-//                 point1 = solution.cycleIndices[1][i2];
-//                 next1 = solution.cycleIndices[1][(i2 + 1) % pointsSolution2];
-//                 prev1 = solution.cycleIndices[1][(i2 - 1 + pointsSolution2) % pointsSolution2]
-//             }
-//             // Get all the neighbours of point 2
-//             int next2;
-//             int prev2;
-//             if (j < pointsSolution1)
-//             {
-//                 cyclePoint2 = 1;
-//                 point2 = solution.cycleIndices[0][j];
-//                 next2 = solution.cycleIndices[0][(j + 1) % pointsSolution1];
-//                 prev2 = solution.cycleIndices[0][(j - 1 + pointsSolution1) % pointsSolution1]
-//             }
-//             else
-//             {
-//                 cyclePoint2 = 2;
-//                 // Calculate where this point is in cycle2
-//                 int j2 = j - pointsSolution1;
-//                 point2 = solution.cycleIndices[1][j2];
-//                 next2 = solution.cycleIndices[1][(j2 + 1) % pointsSolution2];
-//                 prev2 = solution.cycleIndices[1][(j2 - 1 + pointsSolution2) % pointsSolution2]
-//             }
-//             // Calculate delta
-//             delta -= distanceMatrix[point1][next1];
-//             delta -= distanceMatrix[point1][prev1];
-//             delta += distanceMatrix[point1][next2];
-//             delta += distanceMatrix[point1][prev2];
-//             delta -= distanceMatrix[point2][next2];
-//             delta -= distanceMatrix[point2][prev2];
-//             delta += distanceMatrix[point2][next1];
-//             delta += distanceMatrix[point2][prev1];
-//             // Greedy mean take 1st found
-//             if (strategy == "greedy")
-//             {
-//                 if (delta < 0)
-//                 {
-//                     solution.swap(i, j);
-//                     // A swap was found
-//                     return true;
-//                 }
-//             }
-//             if (delta < minDelta)
-//             {
-//             }
-//             // Remove previous connections
-//             // Swap points i and j in the solution
-//             std::swap(solution.points[i], solution.points[j]);
+    double minDelta = std::numeric_limits<double>::max();
+    int besti = -1;
+    int bestj = -1;
+    bool foundSwap = false;
 
-//             // Calculate the score of the new solution after swapping
-//             double newScore = calculateSolutionScore(solution, distanceMatrix);
+    int point1;
+    int point2;
+    int cycleOfPoint1;
+    int cycleOfPoint2;
 
-//             // Evaluate the move based on the strategy
-//             bool validMove = false;
+    // Loop over each pair of points in the solution
+    for (size_t i = 0; i < numberOfPoints; ++i)
+    {
+        for (size_t j = i + 1; j < numberOfPoints; ++j)
+        {
+            // Calculate to which cycle these point belong to
+            // Example 13/50 = 0 (integer division) so it is the 1st cycle
+            // Example 63/50 = 1 (integer division) so it is the 2nd cycle
+            cycleOfPoint1 = i / pointsInCycle1;
+            cycleOfPoint2 = j / pointsInCycle1;
+            // Calculate how much can we gain by swapping these 2 points
+            double delta = 0;
+            // Get all the neighbours of point 1
+            int next1;
+            int prev1;
+            point1 = solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1];
+            next1 = solution.cycleIndices[cycleOfPoint1][(i + 1) % cycleSizes[cycleOfPoint1]];
+            prev1 = solution.cycleIndices[cycleOfPoint1][(i - 1 + cycleSizes[cycleOfPoint1]) % cycleSizes[cycleOfPoint1]];
+            // Get all the neighbours of point 2
+            int next2;
+            int prev2;
+            point2 = solution.cycleIndices[cycleOfPoint2][j % pointsInCycle1];
+            next2 = solution.cycleIndices[cycleOfPoint2][(j + 1) % cycleSizes[cycleOfPoint1]];
+            prev2 = solution.cycleIndices[cycleOfPoint2][(j - 1 + cycleSizes[cycleOfPoint1]) % cycleSizes[cycleOfPoint1]];
+            // Calculate delta
+            delta -= distanceMatrix[point1][next1];
+            delta -= distanceMatrix[point1][prev1];
+            delta += distanceMatrix[point1][next2];
+            delta += distanceMatrix[point1][prev2];
+            delta -= distanceMatrix[point2][next2];
+            delta -= distanceMatrix[point2][prev2];
+            delta += distanceMatrix[point2][next1];
+            delta += distanceMatrix[point2][prev1];
+            // Check if this is the best swap so far
+            if (delta < minDelta)
+            {
+                besti = i;
+                bestj = j;
+                foundSwap = true;
+            }
+            // But greedy LS means take 1st found
+            if (strategy == "greedy")
+            {
+                if (delta < 0)
+                {
+                    // A swap was found
+                    solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1] = point2;
+                    solution.cycleIndices[cycleOfPoint2][j % pointsInCycle1] = point1;
+                    return true;
+                }
+            }
+        }
+    }
+    if (!foundStep)
+    {
+        return false;
+    }
+    else
+    {
+        // A swap was found
+        cycleOfPoint1 = besti / pointsInCycle1;
+        cycleOfPoint2 = bestj / pointsInCycle1;
+        point1 = solution.cycleIndices[cycleOfPoint1][besti % pointsInCycle1];
+        point2 = solution.cycleIndices[cycleOfPoint2][bestj % pointsInCycle1];
+        solution.cycleIndices[cycleOfPoint1][besti % pointsInCycle1] = point2;
+        solution.cycleIndices[cycleOfPoint2][bestj % pointsInCycle1] = point1;
+        return true;
+    }
 
-//             if (strategy == "greedy")
-//             {
-//                 // Greedy: Accept the first improvement found
-//                 if (newScore < solution.score)
-//                 {
-//                     validMove = true;
-//                 }
-//             }
-//             else if (strategy == "steepest")
-//             {
-//                 // Steepest: Make the best possible move (minimize score)
-//                 if (newScore < solution.score)
-//                 {
-//                     solution.score = newScore;
-//                     foundStep = true;
-//                     validMove = true;
-//                 }
-//             }
-
-//             // If a valid move is found, update the solution
-//             if (validMove)
-//             {
-//                 solution.score = newScore;
-//                 std::swap(solution.points[i], solution.points[j]);
-//                 foundStep = true;
-//                 break; // For "greedy", we stop after finding the first improvement
-//             }
-
-//             // If not greedy and no valid move found, we revert the swap
-//             std::swap(solution.points[i], solution.points[j]);
-//         }
-
-//         // If a valid move has been found (for "steepest"), break out of the outer loop
-//         if (foundStep && strategy == "steepest")
-//         {
-//             break;
-//         }
-//     }
-
-//     return foundStep;
-// }
+    return foundStep;
+}
 
 void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {

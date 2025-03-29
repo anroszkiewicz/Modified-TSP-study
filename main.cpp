@@ -18,7 +18,7 @@ struct Point
 
 struct Solution
 {
-    std::vector<int> cycleIndexes[2];
+    std::vector<int> cycleIndices[2];
     double cycle1Score;
     double cycle2Score;
     double score;
@@ -27,8 +27,8 @@ struct Solution
 
     void calculateScore(const std::vector<std::vector<double>> &distanceMatrix)
     {
-        cycle1Score = calculateCycleDistance(cycleIndexes[0], distanceMatrix);
-        cycle2Score = calculateCycleDistance(cycleIndexes[1], distanceMatrix);
+        cycle1Score = calculateCycleDistance(cycleIndices[0], distanceMatrix);
+        cycle2Score = calculateCycleDistance(cycleIndices[1], distanceMatrix);
         score = cycle1Score + cycle2Score;
     }
 
@@ -44,13 +44,13 @@ struct Solution
 
     double getCycle1Score(const std::vector<std::vector<double>> &distanceMatrix)
     {
-        cycle1Score = calculateCycleDistance(cycleIndexes[0], distanceMatrix);
+        cycle1Score = calculateCycleDistance(cycleIndices[0], distanceMatrix);
         return cycle1Score;
     }
 
     double getCycle2Score(const std::vector<std::vector<double>> &distanceMatrix)
     {
-        cycle2Score = calculateCycleDistance(cycleIndexes[1], distanceMatrix);
+        cycle2Score = calculateCycleDistance(cycleIndices[1], distanceMatrix);
         return cycle2Score;
     }
 
@@ -180,8 +180,8 @@ Solution greedyNearestNeighbour(const std::vector<std::vector<double>> &distance
     int start2 = findFurthestPointIndex(distanceMatrix, start1);
 
     // Greedily build the first cycle starting from start1 and start2
-    solution.cycleIndexes[0].push_back(start1);
-    solution.cycleIndexes[1].push_back(start2);
+    solution.cycleIndices[0].push_back(start1);
+    solution.cycleIndices[1].push_back(start2);
     std::vector<bool> visited(n, false);
     visited[start1] = true;
     visited[start2] = true;
@@ -202,13 +202,13 @@ Solution greedyNearestNeighbour(const std::vector<std::vector<double>> &distance
         // Find the nearest unvisited neighbor using the distanceMatrix
         for (int j = 0; j < n; ++j)
         {
-            if (!visited[j] && distanceMatrix[current1][j] < minDistance && solution.cycleIndexes[0].size() < maxCycleSize)
+            if (!visited[j] && distanceMatrix[current1][j] < minDistance && solution.cycleIndices[0].size() < maxCycleSize)
             {
                 minDistance = distanceMatrix[current1][j];
                 nextPoint = j;
                 addToCycle = 1;
             }
-            if (!visited[j] && distanceMatrix[current2][j] < minDistance && solution.cycleIndexes[1].size() < maxCycleSize)
+            if (!visited[j] && distanceMatrix[current2][j] < minDistance && solution.cycleIndices[1].size() < maxCycleSize)
             {
                 minDistance = distanceMatrix[current2][j];
                 nextPoint = j;
@@ -219,12 +219,12 @@ Solution greedyNearestNeighbour(const std::vector<std::vector<double>> &distance
         visited[nextPoint] = true;
         if (addToCycle == 1)
         {
-            solution.cycleIndexes[0].push_back(nextPoint);
+            solution.cycleIndices[0].push_back(nextPoint);
             current1 = nextPoint;
         }
         else
         {
-            solution.cycleIndexes[1].push_back(nextPoint);
+            solution.cycleIndices[1].push_back(nextPoint);
             current2 = nextPoint;
         }
     }
@@ -242,8 +242,8 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
     int start2 = findFurthestPointIndex(distanceMatrix, start1);
 
     // Initialize the cycles with the starting points
-    solution.cycleIndexes[0].push_back(start1);
-    solution.cycleIndexes[1].push_back(start2);
+    solution.cycleIndices[0].push_back(start1);
+    solution.cycleIndices[1].push_back(start2);
     std::vector<bool> visited(n, false);
     visited[start1] = true;
     visited[start2] = true;
@@ -263,13 +263,13 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
         // Try to insert the new vertex in all possible positions in both cycles
         for (int j = 0; j < n; ++j)
         {
-            if (!visited[j] && solution.cycleIndexes[0].size() < maxCycleSize)
+            if (!visited[j] && solution.cycleIndices[0].size() < maxCycleSize)
             {
                 // Try inserting in cycle 1
-                for (int k = 0; k < solution.cycleIndexes[0].size(); ++k)
+                for (int k = 0; k < solution.cycleIndices[0].size(); ++k)
                 {
-                    int prev = solution.cycleIndexes[0][k];
-                    int next = solution.cycleIndexes[0][(k + 1) % solution.cycleIndexes[0].size()];
+                    int prev = solution.cycleIndices[0][k];
+                    int next = solution.cycleIndices[0][(k + 1) % solution.cycleIndices[0].size()];
                     double increase = distanceMatrix[prev][j] + distanceMatrix[j][next] - distanceMatrix[prev][next];
 
                     if (increase < minIncrease)
@@ -282,13 +282,13 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
                 }
             }
 
-            if (!visited[j] && solution.cycleIndexes[1].size() < maxCycleSize)
+            if (!visited[j] && solution.cycleIndices[1].size() < maxCycleSize)
             {
                 // Try inserting in cycle 2
-                for (int k = 0; k < solution.cycleIndexes[1].size(); ++k)
+                for (int k = 0; k < solution.cycleIndices[1].size(); ++k)
                 {
-                    int prev = solution.cycleIndexes[1][k];
-                    int next = solution.cycleIndexes[1][(k + 1) % solution.cycleIndexes[1].size()];
+                    int prev = solution.cycleIndices[1][k];
+                    int next = solution.cycleIndices[1][(k + 1) % solution.cycleIndices[1].size()];
                     double increase = distanceMatrix[prev][j] + distanceMatrix[j][next] - distanceMatrix[prev][next];
 
                     if (increase < minIncrease)
@@ -306,12 +306,12 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
         visited[nextPoint] = true;
         if (addToCycle == 1)
         {
-            solution.cycleIndexes[0].insert(solution.cycleIndexes[0].begin() + insertPosition, nextPoint);
+            solution.cycleIndices[0].insert(solution.cycleIndices[0].begin() + insertPosition, nextPoint);
             current1 = nextPoint;
         }
         else
         {
-            solution.cycleIndexes[1].insert(solution.cycleIndexes[1].begin() + insertPosition, nextPoint);
+            solution.cycleIndices[1].insert(solution.cycleIndices[1].begin() + insertPosition, nextPoint);
             current2 = nextPoint;
         }
     }
@@ -329,8 +329,8 @@ Solution regretCycleWeighted(const std::vector<std::vector<double>> &distanceMat
     int start2 = findFurthestPointIndex(distanceMatrix, start1);
 
     // Initialize cycles with starting points
-    solution.cycleIndexes[0].push_back(start1);
-    solution.cycleIndexes[1].push_back(start2);
+    solution.cycleIndices[0].push_back(start1);
+    solution.cycleIndices[1].push_back(start2);
     std::vector<bool> visited(n, false);
     visited[start1] = true;
     visited[start2] = true;
@@ -356,12 +356,12 @@ Solution regretCycleWeighted(const std::vector<std::vector<double>> &distanceMat
             int bestPos1 = -1, bestPos2 = -1;
 
             // Find best insertion cost for cycle 1
-            if (solution.cycleIndexes[0].size() < maxCycleSize)
+            if (solution.cycleIndices[0].size() < maxCycleSize)
             {
-                for (size_t idx = 0; idx < solution.cycleIndexes[0].size(); ++idx)
+                for (size_t idx = 0; idx < solution.cycleIndices[0].size(); ++idx)
                 {
-                    int prev = solution.cycleIndexes[0][idx];
-                    int next = solution.cycleIndexes[0][(idx + 1) % solution.cycleIndexes[0].size()];
+                    int prev = solution.cycleIndices[0][idx];
+                    int next = solution.cycleIndices[0][(idx + 1) % solution.cycleIndices[0].size()];
                     double cost = distanceMatrix[prev][j] + distanceMatrix[j][next] - distanceMatrix[prev][next];
 
                     if (cost < bestCost1)
@@ -373,12 +373,12 @@ Solution regretCycleWeighted(const std::vector<std::vector<double>> &distanceMat
             }
 
             // Find best insertion cost for cycle 2
-            if (solution.cycleIndexes[1].size() < maxCycleSize)
+            if (solution.cycleIndices[1].size() < maxCycleSize)
             {
-                for (size_t idx = 0; idx < solution.cycleIndexes[1].size(); ++idx)
+                for (size_t idx = 0; idx < solution.cycleIndices[1].size(); ++idx)
                 {
-                    int prev = solution.cycleIndexes[1][idx];
-                    int next = solution.cycleIndexes[1][(idx + 1) % solution.cycleIndexes[1].size()];
+                    int prev = solution.cycleIndices[1][idx];
+                    int next = solution.cycleIndices[1][(idx + 1) % solution.cycleIndices[1].size()];
                     double cost = distanceMatrix[prev][j] + distanceMatrix[j][next] - distanceMatrix[prev][next];
 
                     if (cost < bestCost2)
@@ -415,11 +415,11 @@ Solution regretCycleWeighted(const std::vector<std::vector<double>> &distanceMat
         visited[nextPoint] = true;
         if (bestCycle == 1)
         {
-            solution.cycleIndexes[0].insert(solution.cycleIndexes[0].begin() + bestInsertPos, nextPoint);
+            solution.cycleIndices[0].insert(solution.cycleIndices[0].begin() + bestInsertPos, nextPoint);
         }
         else
         {
-            solution.cycleIndexes[1].insert(solution.cycleIndexes[1].begin() + bestInsertPos, nextPoint);
+            solution.cycleIndices[1].insert(solution.cycleIndices[1].begin() + bestInsertPos, nextPoint);
         }
     }
 
@@ -447,15 +447,15 @@ void plotSolution(Solution &solution, const std::vector<Point> &points, const st
     double totalDistance = cycle1Distance + cycle2Distance;
 
     // Print cycles and distances to console
-    std::cout << "Cycle 1 (size " << solution.cycleIndexes[0].size() << "): ";
-    for (int index : solution.cycleIndexes[0])
+    std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
+    for (int index : solution.cycleIndices[0])
     {
         std::cout << index << " ";
     }
     std::cout << "\nTotal Distance: " << cycle1Distance << std::endl;
 
-    std::cout << "Cycle 2 (size " << solution.cycleIndexes[1].size() << "): ";
-    for (int index : solution.cycleIndexes[1])
+    std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
+    for (int index : solution.cycleIndices[1])
     {
         std::cout << index << " ";
     }
@@ -475,18 +475,18 @@ void plotSolution(Solution &solution, const std::vector<Point> &points, const st
     plt::scatter(x_coords, y_coords, 10.0);
 
     // Plot Cycle 1 in Red
-    for (size_t i = 0; i < solution.cycleIndexes[0].size(); ++i)
+    for (size_t i = 0; i < solution.cycleIndices[0].size(); ++i)
     {
-        int a = solution.cycleIndexes[0][i];
-        int b = solution.cycleIndexes[0][(i + 1) % solution.cycleIndexes[0].size()];
+        int a = solution.cycleIndices[0][i];
+        int b = solution.cycleIndices[0][(i + 1) % solution.cycleIndices[0].size()];
         plt::plot({points[a].x, points[b].x}, {points[a].y, points[b].y}, "r");
     }
 
     // Plot Cycle 2 in Blue
-    for (size_t i = 0; i < solution.cycleIndexes[1].size(); ++i)
+    for (size_t i = 0; i < solution.cycleIndices[1].size(); ++i)
     {
-        int a = solution.cycleIndexes[1][i];
-        int b = solution.cycleIndexes[1][(i + 1) % solution.cycleIndexes[1].size()];
+        int a = solution.cycleIndices[1][i];
+        int b = solution.cycleIndices[1][(i + 1) % solution.cycleIndices[1].size()];
         plt::plot({points[a].x, points[b].x}, {points[a].y, points[b].y}, "b");
     }
 
@@ -653,9 +653,9 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
     for (int i = 0; i < n; ++i)
     {
         if (cycleAssignment[i] == 0)
-            solution.cycleIndexes[0].push_back(indices[i]);
+            solution.cycleIndices[0].push_back(indices[i]);
         else
-            solution.cycleIndexes[1].push_back(indices[i]);
+            solution.cycleIndices[1].push_back(indices[i]);
     }
 
     return solution;
@@ -665,8 +665,8 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
 // {
 //     bool foundStep = false;
 //     size_t numberOfPoints = distanceMatrix.size();
-//     size_t pointsSolution1 = solution.cycleIndexes[0].size();
-//     size_t pointsSolution2 = solution.cycleIndexes[1].size();
+//     size_t pointsSolution1 = solution.cycleIndices[0].size();
+//     size_t pointsSolution2 = solution.cycleIndices[1].size();
 
 //     double minDelta = std::numeric_limits<double>::max();
 
@@ -687,18 +687,18 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
 //             if (i < pointsSolution1)
 //             {
 //                 cyclePoint1 = 1;
-//                 point1 = solution.cycleIndexes[0][i];
-//                 next1 = solution.cycleIndexes[0][(i + 1) % pointsSolution1];
-//                 prev1 = solution.cycleIndexes[0][(i - 1 + pointsSolution1) % pointsSolution1]
+//                 point1 = solution.cycleIndices[0][i];
+//                 next1 = solution.cycleIndices[0][(i + 1) % pointsSolution1];
+//                 prev1 = solution.cycleIndices[0][(i - 1 + pointsSolution1) % pointsSolution1]
 //             }
 //             else
 //             {
 //                 cyclePoint1 = 2;
 //                 // Calculate where this point is in cycle2
 //                 int i2 = i - pointsSolution1;
-//                 point1 = solution.cycleIndexes[1][i2];
-//                 next1 = solution.cycleIndexes[1][(i2 + 1) % pointsSolution2];
-//                 prev1 = solution.cycleIndexes[1][(i2 - 1 + pointsSolution2) % pointsSolution2]
+//                 point1 = solution.cycleIndices[1][i2];
+//                 next1 = solution.cycleIndices[1][(i2 + 1) % pointsSolution2];
+//                 prev1 = solution.cycleIndices[1][(i2 - 1 + pointsSolution2) % pointsSolution2]
 //             }
 //             // Get all the neighbours of point 2
 //             int next2;
@@ -706,18 +706,18 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
 //             if (j < pointsSolution1)
 //             {
 //                 cyclePoint2 = 1;
-//                 point2 = solution.cycleIndexes[0][j];
-//                 next2 = solution.cycleIndexes[0][(j + 1) % pointsSolution1];
-//                 prev2 = solution.cycleIndexes[0][(j - 1 + pointsSolution1) % pointsSolution1]
+//                 point2 = solution.cycleIndices[0][j];
+//                 next2 = solution.cycleIndices[0][(j + 1) % pointsSolution1];
+//                 prev2 = solution.cycleIndices[0][(j - 1 + pointsSolution1) % pointsSolution1]
 //             }
 //             else
 //             {
 //                 cyclePoint2 = 2;
 //                 // Calculate where this point is in cycle2
 //                 int j2 = j - pointsSolution1;
-//                 point2 = solution.cycleIndexes[1][j2];
-//                 next2 = solution.cycleIndexes[1][(j2 + 1) % pointsSolution2];
-//                 prev2 = solution.cycleIndexes[1][(j2 - 1 + pointsSolution2) % pointsSolution2]
+//                 point2 = solution.cycleIndices[1][j2];
+//                 next2 = solution.cycleIndices[1][(j2 + 1) % pointsSolution2];
+//                 prev2 = solution.cycleIndices[1][(j2 - 1 + pointsSolution2) % pointsSolution2]
 //             }
 //             // Calculate delta
 //             delta -= distanceMatrix[point1][next1];

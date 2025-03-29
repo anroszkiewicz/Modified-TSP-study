@@ -439,7 +439,7 @@ void displayDistanceMatrix(const std::vector<std::vector<double>> &distanceMatri
     }
 }
 
-void plotSolution(Solution &solution, const std::vector<Point> &points, const std::vector<std::vector<double>> &distanceMatrix)
+void plotSolution(Solution &solution, const std::vector<Point> &points, const std::vector<std::vector<double>> &distanceMatrix, const std::string &title)
 {
     // Calculate distances
     double cycle1Distance = solution.getCycle1Score(distanceMatrix);
@@ -490,7 +490,8 @@ void plotSolution(Solution &solution, const std::vector<Point> &points, const st
         plt::plot({points[a].x, points[b].x}, {points[a].y, points[b].y}, "b");
     }
 
-    // Display score under the plot
+    // Add title and display score under the plot
+    plt::title(title);
     plt::text(0.05, -0.1, "Total Distance: " + std::to_string(totalDistance));
 
     // Show plot
@@ -530,6 +531,7 @@ void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
     for (int i = 0; i < iterations; ++i)
     {
+        // std::cout << "Progress: " << i << "/" << iterations << std::endl;
         // Apply greedyNearestNeighbour algorithm
         Solution solution1 = greedyNearestNeighbour(distanceMatrix);
         solution1.calculateScore(distanceMatrix);
@@ -598,40 +600,25 @@ void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     double avgWeightedRegretCycleScore = totalWeightedRegretCycleScore / iterations;
 
     // Print results for each algorithm
-    std::cout << "\nGreedyNearestNeighbour Algorithm Results:" << std::endl;
-    std::cout << "Min Score: " << minGreedyNNScore << std::endl;
-    std::cout << "Max Score: " << maxGreedyNNScore << std::endl;
-    std::cout << "Average Score: " << avgGreedyNNScore << std::endl;
+    std::cout << "\nGreedyNearestNeighbour Algorithm Results:\n";
+    std::cout << "Min: " << minGreedyNNScore << " Max: " << maxGreedyNNScore
+              << " Avg: " << avgGreedyNNScore << "\n";
+    plotSolution(bestGreedyNNSolution, points, distanceMatrix, "GreedyNearestNeighbour");
 
-    std::cout << "\nGreedyCycle Algorithm Results:" << std::endl;
-    std::cout << "Min Score: " << minGreedyCycleScore << std::endl;
-    std::cout << "Max Score: " << maxGreedyCycleScore << std::endl;
-    std::cout << "Average Score: " << avgGreedyCycleScore << std::endl;
+    std::cout << "\nGreedyCycle Algorithm Results:\n";
+    std::cout << "Min: " << minGreedyCycleScore << " Max: " << maxGreedyCycleScore
+              << " Avg: " << avgGreedyCycleScore << "\n";
+    plotSolution(bestGreedyCycleSolution, points, distanceMatrix, "GreedyCycle");
 
-    std::cout << "\nRegretCycle Algorithm Results:" << std::endl;
-    std::cout << "Min Score: " << minRegretCycleScore << std::endl;
-    std::cout << "Max Score: " << maxRegretCycleScore << std::endl;
-    std::cout << "Average Score: " << avgRegretCycleScore << std::endl;
+    std::cout << "\nRegretCycle Algorithm Results:\n";
+    std::cout << "Min: " << minRegretCycleScore << " Max: " << maxRegretCycleScore
+              << " Avg: " << avgRegretCycleScore << "\n";
+    plotSolution(bestRegretCycleSolution, points, distanceMatrix, "RegretCycle");
 
-    std::cout << "\nRegretCycleWeighted Algorithm Results:" << std::endl;
-    std::cout << "Min Score: " << minWeightedRegretCycleScore << std::endl;
-    std::cout << "Max Score: " << maxWeightedRegretCycleScore << std::endl;
-    std::cout << "Average Score: " << avgWeightedRegretCycleScore << std::endl;
-
-    // Plot best solutions for each algorithm
-    std::cout << "\nPlotting Best Solutions:" << std::endl;
-
-    std::cout << "Best GreedyNearestNeighbour Solution:" << std::endl;
-    plotSolution(bestGreedyNNSolution, points, distanceMatrix);
-
-    std::cout << "Best GreedyCycle Solution:" << std::endl;
-    plotSolution(bestGreedyCycleSolution, points, distanceMatrix);
-
-    std::cout << "Best RegretCycle Solution:" << std::endl;
-    plotSolution(bestRegretCycleSolution, points, distanceMatrix);
-
-    std::cout << "Best RegretCycleWeighted Solution:" << std::endl;
-    plotSolution(bestWeightedRegretCycleSolution, points, distanceMatrix);
+    std::cout << "\nRegretCycleWeighted Algorithm Results:\n";
+    std::cout << "Min: " << minWeightedRegretCycleScore << " Max: " << maxWeightedRegretCycleScore
+              << " Avg: " << avgWeightedRegretCycleScore << "\n";
+    plotSolution(bestWeightedRegretCycleSolution, points, distanceMatrix, "RegretCycleWeighted");
 }
 
 Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
@@ -663,6 +650,7 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
 
 bool stepPointExchange(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, const std::string &strategy)
 {
+    const double epsilon = 1e-6; // Avoid numerical errors
     size_t numberOfPoints = distanceMatrix.size();
     size_t pointsInCycle1 = solution.cycleIndices[0].size(); // Size of first cycle
     size_t pointsInCycle2 = solution.cycleIndices[1].size(); // Size of second cycle
@@ -728,7 +716,7 @@ bool stepPointExchange(Solution &solution, const std::vector<std::vector<double>
             delta += distanceMatrix[point2][prev1];
 
             // Check if this is the best swap so far
-            if (delta < minDelta)
+            if (delta < minDelta - epsilon)
             {
                 besti = i;
                 bestj = j;
@@ -736,16 +724,12 @@ bool stepPointExchange(Solution &solution, const std::vector<std::vector<double>
                 foundSwap = true;
             }
             // But greedy LS means take 1st found
-            if (strategy == "greedy")
+            if (strategy == "greedy" && delta < -epsilon)
             {
-                if (delta < 0)
-                {
-                    // A swap was found
-                    solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1] = point2;
-                    solution.cycleIndices[cycleOfPoint2][j % pointsInCycle1] = point1;
-                    solution.calculateScore(distanceMatrix);
-                    return true;
-                }
+                // A swap was found
+                solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1] = point2;
+                solution.cycleIndices[cycleOfPoint2][j % pointsInCycle1] = point1;
+                return true;
             }
         }
     }
@@ -768,13 +752,180 @@ bool stepPointExchange(Solution &solution, const std::vector<std::vector<double>
     return foundSwap;
 }
 
+bool stepEdgeExchange(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, const std::string &strategy)
+{
+    const double epsilon = 1e-6; // Avoid numerical error
+    size_t numberOfPoints = distanceMatrix.size();
+    size_t pointsInCycle1 = solution.cycleIndices[0].size();
+    size_t pointsInCycle2 = solution.cycleIndices[1].size();
+    std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
+
+    double minDelta = 0.0;
+    int besti = -1;
+    int bestj = -1;
+    int bestc = -1;
+    bool foundSwap = false;
+
+    int point1, point2, cycleOfPoint1, cycleOfPoint2;
+
+    // Loop over each cycle
+    for (size_t c = 0; c < 2; ++c)
+    {
+        // Loop over each pair of points in the solution
+        for (size_t i = 0; i < cycleSizes[c]; ++i)
+        {
+            for (size_t j = 1; j < cycleSizes[c] - 1; ++j) // Avoid reversing whole cycle
+            {
+                double delta = 0;
+                int prev1, next2;
+                point1 = solution.cycleIndices[c][i];
+                prev1 = solution.cycleIndices[c][(i - 1 + cycleSizes[c]) % cycleSizes[c]];
+                point2 = solution.cycleIndices[c][(i + j) % cycleSizes[c]];
+                next2 = solution.cycleIndices[c][(i + j + 1) % cycleSizes[c]];
+
+                delta -= distanceMatrix[point1][prev1];
+                delta -= distanceMatrix[point2][next2];
+                delta += distanceMatrix[point1][next2];
+                delta += distanceMatrix[point2][prev1];
+
+                if (delta < minDelta - epsilon)
+                {
+                    bestc = c;
+                    besti = i;
+                    bestj = j;
+                    minDelta = delta;
+                    foundSwap = true;
+                }
+
+                if (strategy == "greedy" && delta < -epsilon)
+                {
+                    // Perform the swap immediately
+                    size_t endIdx = (i + j) % cycleSizes[c];
+
+                    if (endIdx > i)
+                    {
+                        // Normal case: reverse directly
+                        std::reverse(solution.cycleIndices[c].begin() + i, solution.cycleIndices[c].begin() + endIdx + 1);
+                    }
+                    else
+                    {
+                        // Wrap-around case
+                        std::vector<int> temp;
+
+                        // Move front elements to the back
+                        temp.insert(temp.end(), solution.cycleIndices[c].begin() + endIdx + 1, solution.cycleIndices[c].end());
+                        temp.insert(temp.end(), solution.cycleIndices[c].begin(), solution.cycleIndices[c].begin() + endIdx + 1);
+
+                        // Reverse the required section
+                        std::reverse(temp.begin(), temp.begin() + (cycleSizes[c] - i));
+
+                        // Restore back to the original vector
+                        for (size_t k = 0; k < temp.size(); ++k)
+                        {
+                            solution.cycleIndices[c][(i + k) % cycleSizes[c]] = temp[k];
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+    }
+
+    if (!foundSwap)
+    {
+        return false;
+    }
+    else
+    {
+        // Perform the best swap found
+        size_t endIdx = (besti + bestj) % cycleSizes[bestc];
+
+        if (endIdx > besti)
+        {
+            // Normal case: reverse directly
+            std::reverse(solution.cycleIndices[bestc].begin() + besti, solution.cycleIndices[bestc].begin() + endIdx + 1);
+        }
+        else
+        {
+            // Wrap-around case
+            std::vector<int> temp;
+
+            // Move front elements to the back
+            temp.insert(temp.end(), solution.cycleIndices[bestc].begin() + endIdx + 1, solution.cycleIndices[bestc].end());
+            temp.insert(temp.end(), solution.cycleIndices[bestc].begin(), solution.cycleIndices[bestc].begin() + endIdx + 1);
+
+            // Reverse the required section
+            std::reverse(temp.begin(), temp.begin() + (cycleSizes[bestc] - besti));
+
+            // Restore back to the original vector
+            for (size_t k = 0; k < temp.size(); ++k)
+            {
+                solution.cycleIndices[bestc][(besti + k) % cycleSizes[bestc]] = temp[k];
+            }
+            return true;
+        }
+    }
+    return foundSwap;
+}
+
 Solution localSearchVertex(Solution solution, const std::vector<std::vector<double>> &distanceMatrix, const std::string &strategy)
 {
-    bool improvement = true;
+    if (strategy == "greedy")
+    {
+        // Randomize the process slightly
+        std::random_device rd;
+        std::mt19937 rng(rd());
 
+        // Shuffle starting points for both cycles
+        for (int i = 0; i < 2; ++i)
+        {
+            if (!solution.cycleIndices[i].empty())
+            {
+                std::uniform_int_distribution<int> dist(0, solution.cycleIndices[i].size() - 1);
+                int randomIndex = dist(rng); // Pick a random index
+                // Rotate cycle to start from the chosen random index
+                std::rotate(solution.cycleIndices[i].begin(),
+                            solution.cycleIndices[i].begin() + randomIndex,
+                            solution.cycleIndices[i].end());
+            }
+        }
+    }
+
+    bool improvement = true;
     while (improvement)
     {
         improvement = stepPointExchange(solution, distanceMatrix, strategy);
+    }
+    return solution;
+}
+
+Solution localSearchEdges(Solution solution, const std::vector<std::vector<double>> &distanceMatrix, const std::string &strategy)
+{
+    if (strategy == "greedy")
+    {
+        // Randomize the process slightly
+        std::random_device rd;
+        std::mt19937 rng(rd());
+
+        // Shuffle starting points for both cycles
+        for (int i = 0; i < 2; ++i)
+        {
+            if (!solution.cycleIndices[i].empty())
+            {
+                std::uniform_int_distribution<int> dist(0, solution.cycleIndices[i].size() - 1);
+                int randomIndex = dist(rng); // Pick a random index
+                // Rotate cycle to start from the chosen random index
+                std::rotate(solution.cycleIndices[i].begin(),
+                            solution.cycleIndices[i].begin() + randomIndex,
+                            solution.cycleIndices[i].end());
+            }
+        }
+    }
+
+    bool improvement = true;
+    while (improvement)
+    {
+        improvement = stepEdgeExchange(solution, distanceMatrix, strategy);
     }
     return solution;
 }
@@ -848,9 +999,12 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     double totalGreedyGreedyEdgeScore = 0.0;
     Solution bestGreedyGreedyEdgeSolution;
 
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
     for (int i = 0; i < iterations; ++i)
     {
-        std::cout << i << std::endl;
+        std::cout << "Progress: " << i << "/" << iterations << std::endl;
+
         // Generate initial random and greedy solutions
         Solution initialRandom = randomCycle(distanceMatrix);
         Solution initialGreedy = regretCycleWeighted(distanceMatrix, 1.0, 1.0);
@@ -865,14 +1019,15 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score1 == minRandomSteepestPointScore)
             bestRandomSteepestPointSolution = solution1;
 
-        // 2. Random + Steepest Descent + Edge Exchange (Placeholder)
-        Solution solution2; // Implement Edge Exchange here
-        // solution2.calculateScore(distanceMatrix);
-        // double score2 = solution2.getScore();
-        // minRandomSteepestEdgeScore = std::min(minRandomSteepestEdgeScore, score2);
-        // maxRandomSteepestEdgeScore = std::max(maxRandomSteepestEdgeScore, score2);
-        // totalRandomSteepestEdgeScore += score2;
-        // if (score2 == minRandomSteepestEdgeScore) bestRandomSteepestEdgeSolution = solution2;
+        // 2. Random + Steepest Descent + Edge Exchange
+        Solution solution2 = localSearchEdges(initialRandom, distanceMatrix, "steepest");
+        solution2.calculateScore(distanceMatrix);
+        double score2 = solution2.getScore();
+        minRandomSteepestEdgeScore = std::min(minRandomSteepestEdgeScore, score2);
+        maxRandomSteepestEdgeScore = std::max(maxRandomSteepestEdgeScore, score2);
+        totalRandomSteepestEdgeScore += score2;
+        if (score2 == minRandomSteepestEdgeScore)
+            bestRandomSteepestEdgeSolution = solution2;
 
         // 3. Random + Greedy Local Search + Point Exchange
         Solution solution3 = localSearchVertex(initialRandom, distanceMatrix, "greedy");
@@ -884,8 +1039,15 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score3 == minRandomGreedyPointScore)
             bestRandomGreedyPointSolution = solution3;
 
-        // 4. Random + Greedy Local Search + Edge Exchange (Placeholder)
-        Solution solution4; // Implement Edge Exchange here
+        // 4. Random + Greedy Local Search + Edge Exchange
+        Solution solution4 = localSearchEdges(initialRandom, distanceMatrix, "greedy");
+        solution4.calculateScore(distanceMatrix);
+        double score4 = solution4.getScore();
+        minRandomGreedyEdgeScore = std::min(minRandomGreedyEdgeScore, score4);
+        maxRandomGreedyEdgeScore = std::max(maxRandomGreedyEdgeScore, score4);
+        totalRandomGreedyEdgeScore += score4;
+        if (score4 == minRandomGreedyEdgeScore)
+            bestRandomGreedyEdgeSolution = solution4;
 
         // 5. Greedy + Steepest Descent + Point Exchange
         Solution solution5 = localSearchVertex(initialGreedy, distanceMatrix, "steepest");
@@ -897,8 +1059,15 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score5 == minGreedySteepestPointScore)
             bestGreedySteepestPointSolution = solution5;
 
-        // 6. Greedy + Steepest Descent + Edge Exchange (Placeholder)
-        Solution solution6; // Implement Edge Exchange here
+        // 6. Greedy + Steepest Descent + Edge Exchange
+        Solution solution6 = localSearchEdges(initialGreedy, distanceMatrix, "steepest");
+        solution6.calculateScore(distanceMatrix);
+        double score6 = solution6.getScore();
+        minGreedySteepestEdgeScore = std::min(minGreedySteepestEdgeScore, score6);
+        maxGreedySteepestEdgeScore = std::max(maxGreedySteepestEdgeScore, score6);
+        totalGreedySteepestEdgeScore += score6;
+        if (score6 == minGreedySteepestEdgeScore)
+            bestGreedySteepestEdgeSolution = solution6;
 
         // 7. Greedy + Greedy Local Search + Point Exchange
         Solution solution7 = localSearchVertex(initialGreedy, distanceMatrix, "greedy");
@@ -910,50 +1079,57 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score7 == minGreedyGreedyPointScore)
             bestGreedyGreedyPointSolution = solution7;
 
-        // 8. Greedy + Greedy Local Search + Edge Exchange (Placeholder)
-        Solution solution8; // Implement Edge Exchange here
+        // 8. Greedy + Greedy Local Search + Edge Exchange
+        Solution solution8 = localSearchEdges(initialGreedy, distanceMatrix, "greedy");
+        solution8.calculateScore(distanceMatrix);
+        double score8 = solution8.getScore();
+        minGreedyGreedyEdgeScore = std::min(minGreedyGreedyEdgeScore, score8);
+        maxGreedyGreedyEdgeScore = std::max(maxGreedyGreedyEdgeScore, score8);
+        totalGreedyGreedyEdgeScore += score8;
+        if (score8 == minGreedyGreedyEdgeScore)
+            bestGreedyGreedyEdgeSolution = solution8;
     }
 
     // Print results
     std::cout << "\nRandom + Steepest Descent + Point Exchange:\n";
     std::cout << "Min: " << minRandomSteepestPointScore << " Max: " << maxRandomSteepestPointScore
               << " Avg: " << (totalRandomSteepestPointScore / iterations) << "\n";
-    plotSolution(bestRandomSteepestPointSolution, points, distanceMatrix);
+    plotSolution(bestRandomSteepestPointSolution, points, distanceMatrix, "Random + Steepest Descent + Point Exchange");
 
     std::cout << "\nRandom + Steepest Descent + Edge Exchange:\n";
     std::cout << "Min: " << minRandomSteepestEdgeScore << " Max: " << maxRandomSteepestEdgeScore
               << " Avg: " << (totalRandomSteepestEdgeScore / iterations) << "\n";
-    plotSolution(bestRandomSteepestEdgeSolution, points, distanceMatrix);
+    plotSolution(bestRandomSteepestEdgeSolution, points, distanceMatrix, "Random + Steepest Descent + Edge Exchange");
 
     std::cout << "\nRandom + Greedy Local Search + Point Exchange:\n";
     std::cout << "Min: " << minRandomGreedyPointScore << " Max: " << maxRandomGreedyPointScore
               << " Avg: " << (totalRandomGreedyPointScore / iterations) << "\n";
-    plotSolution(bestRandomGreedyPointSolution, points, distanceMatrix);
+    plotSolution(bestRandomGreedyPointSolution, points, distanceMatrix, "Random + Greedy Local Search + Point Exchange");
 
     std::cout << "\nRandom + Greedy Local Search + Edge Exchange:\n";
     std::cout << "Min: " << minRandomGreedyEdgeScore << " Max: " << maxRandomGreedyEdgeScore
               << " Avg: " << (totalRandomGreedyEdgeScore / iterations) << "\n";
-    plotSolution(bestRandomGreedyEdgeSolution, points, distanceMatrix);
+    plotSolution(bestRandomGreedyEdgeSolution, points, distanceMatrix, "Random + Greedy Local Search + Edge Exchange");
 
     std::cout << "\nGreedy + Steepest Descent + Point Exchange:\n";
     std::cout << "Min: " << minGreedySteepestPointScore << " Max: " << maxGreedySteepestPointScore
               << " Avg: " << (totalGreedySteepestPointScore / iterations) << "\n";
-    plotSolution(bestGreedySteepestPointSolution, points, distanceMatrix);
+    plotSolution(bestGreedySteepestPointSolution, points, distanceMatrix, "Greedy + Steepest Descent + Point Exchange");
 
     std::cout << "\nGreedy + Steepest Descent + Edge Exchange:\n";
     std::cout << "Min: " << minGreedySteepestEdgeScore << " Max: " << maxGreedySteepestEdgeScore
               << " Avg: " << (totalGreedySteepestEdgeScore / iterations) << "\n";
-    plotSolution(bestGreedySteepestEdgeSolution, points, distanceMatrix);
+    plotSolution(bestGreedySteepestEdgeSolution, points, distanceMatrix, "Greedy + Steepest Descent + Edge Exchange");
 
     std::cout << "\nGreedy + Greedy Local Search + Point Exchange:\n";
     std::cout << "Min: " << minGreedyGreedyPointScore << " Max: " << maxGreedyGreedyPointScore
               << " Avg: " << (totalGreedyGreedyPointScore / iterations) << "\n";
-    plotSolution(bestGreedyGreedyPointSolution, points, distanceMatrix);
+    plotSolution(bestGreedyGreedyPointSolution, points, distanceMatrix, "Greedy + Greedy Local Search + Point Exchange");
 
     std::cout << "\nGreedy + Greedy Local Search + Edge Exchange:\n";
     std::cout << "Min: " << minGreedyGreedyEdgeScore << " Max: " << maxGreedyGreedyEdgeScore
               << " Avg: " << (totalGreedyGreedyEdgeScore / iterations) << "\n";
-    plotSolution(bestGreedyGreedyEdgeSolution, points, distanceMatrix);
+    plotSolution(bestGreedyGreedyEdgeSolution, points, distanceMatrix, "Greedy + Greedy Local Search + Edge Exchange");
 }
 
 int main(int argc, char *argv[])

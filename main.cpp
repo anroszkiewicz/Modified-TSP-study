@@ -472,19 +472,8 @@ double calculateSolutionScore(const Solution &solution, const std::vector<std::v
     return cycle1Distance + cycle2Distance;
 }
 
-int main(int argc, char *argv[])
+void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    std::string filepath = argv[1];
-    std::vector<Point> points = loadPointsFromFile(filepath);
-    if (points.empty())
-    {
-        std::cerr << "No points loaded from the file!" << std::endl;
-        return -1;
-    }
-
-    // Create the adjacency list
-    std::vector<std::vector<double>> distanceMatrix = createdistanceMatrix(points);
-
     // Initialize variables for tracking scores
     int iterations = 100;
 
@@ -614,6 +603,22 @@ int main(int argc, char *argv[])
 
     std::cout << "Best RegretCycleWeighted Solution:" << std::endl;
     plotSolution(bestWeightedRegretCycleSolution, points, distanceMatrix);
+}
+
+int main(int argc, char *argv[])
+{
+    std::string filepath = argv[1];
+    std::vector<Point> points = loadPointsFromFile(filepath);
+    if (points.empty())
+    {
+        std::cerr << "No points loaded from the file!" << std::endl;
+        return -1;
+    }
+
+    // Create the adjacency list
+    std::vector<std::vector<double>> distanceMatrix = createdistanceMatrix(points);
+
+    lab1(points, distanceMatrix);
 
     return 0;
 }

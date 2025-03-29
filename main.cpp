@@ -6,6 +6,7 @@
 #include <cmath>
 #include <ctime>
 #include <limits>
+#include <random>
 #include "matplotlibcpp.h"
 
 namespace plt = matplotlibcpp;
@@ -19,6 +20,53 @@ struct Solution
 {
     std::vector<int> cycle1Indexes;
     std::vector<int> cycle2Indexes;
+    double cycle1Score;
+    double cycle2Score;
+    double score;
+
+    Solution() : cycle1Score(0.0), cycle2Score(0.0), score(0.0) {}
+
+    void calculateScore(const std::vector<std::vector<double>> &distanceMatrix)
+    {
+        cycle1Score = calculateCycleDistance(cycle1Indexes, distanceMatrix);
+        cycle2Score = calculateCycleDistance(cycle2Indexes, distanceMatrix);
+        score = cycle1Score + cycle2Score;
+    }
+
+    void modifyScore(double change)
+    {
+        score += change;
+    }
+
+    double getScore() const
+    {
+        return score;
+    }
+
+    double getCycle1Score(const std::vector<std::vector<double>> &distanceMatrix)
+    {
+        cycle1Score = calculateCycleDistance(cycle1Indexes, distanceMatrix);
+        return cycle1Score;
+    }
+
+    double getCycle2Score(const std::vector<std::vector<double>> &distanceMatrix)
+    {
+        cycle2Score = calculateCycleDistance(cycle2Indexes, distanceMatrix);
+        return cycle2Score;
+    }
+
+    double calculateCycleDistance(const std::vector<int> &cycle, const std::vector<std::vector<double>> &distanceMatrix) const
+    {
+        double totalDistance = 0.0;
+        int cycleSize = cycle.size();
+        for (int i = 0; i < cycleSize; ++i)
+        {
+            int current = cycle[i];
+            int next = cycle[(i + 1) % cycleSize]; // Wrap around to form a cycle
+            totalDistance += distanceMatrix[current][next];
+        }
+        return totalDistance;
+    }
 };
 
 std::vector<Point> loadPointsFromFile(const std::string &filepath)
@@ -185,7 +233,6 @@ Solution greedyNearestNeighbour(const std::vector<std::vector<double>> &distance
     return solution;
 }
 
-// Greedy cycle algorithm for solving TSP with insertion at the best position
 Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
 {
     Solution solution;
@@ -273,7 +320,6 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
     return solution;
 }
 
-// Regret-based greedy cycle algorithm for TSP
 Solution regretCycleWeighted(const std::vector<std::vector<double>> &distanceMatrix, double weightCost = 0.0, double weightRegret = 1.0)
 {
     Solution solution;
@@ -394,24 +440,11 @@ void displayDistanceMatrix(const std::vector<std::vector<double>> &distanceMatri
     }
 }
 
-double calculateCycleDistance(const std::vector<int> &cycle, const std::vector<std::vector<double>> &distanceMatrix)
-{
-    double totalDistance = 0.0;
-    int cycleSize = cycle.size();
-    for (int i = 0; i < cycleSize; ++i)
-    {
-        int current = cycle[i];
-        int next = cycle[(i + 1) % cycleSize]; // Wrap around to form a cycle
-        totalDistance += distanceMatrix[current][next];
-    }
-    return totalDistance;
-}
-
-void plotSolution(const Solution &solution, const std::vector<Point> &points, const std::vector<std::vector<double>> &distanceMatrix)
+void plotSolution(Solution &solution, const std::vector<Point> &points, const std::vector<std::vector<double>> &distanceMatrix)
 {
     // Calculate distances
-    double cycle1Distance = calculateCycleDistance(solution.cycle1Indexes, distanceMatrix);
-    double cycle2Distance = calculateCycleDistance(solution.cycle2Indexes, distanceMatrix);
+    double cycle1Distance = solution.getCycle1Score(distanceMatrix);
+    double cycle2Distance = solution.getCycle2Score(distanceMatrix);
     double totalDistance = cycle1Distance + cycle2Distance;
 
     // Print cycles and distances to console
@@ -465,13 +498,6 @@ void plotSolution(const Solution &solution, const std::vector<Point> &points, co
     plt::show();
 }
 
-double calculateSolutionScore(const Solution &solution, const std::vector<std::vector<double>> &distanceMatrix)
-{
-    double cycle1Distance = calculateCycleDistance(solution.cycle1Indexes, distanceMatrix);
-    double cycle2Distance = calculateCycleDistance(solution.cycle2Indexes, distanceMatrix);
-    return cycle1Distance + cycle2Distance;
-}
-
 void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
     // Initialize variables for tracking scores
@@ -507,7 +533,8 @@ void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     {
         // Apply greedyNearestNeighbour algorithm
         Solution solution1 = greedyNearestNeighbour(distanceMatrix);
-        double greedyNNScore = calculateSolutionScore(solution1, distanceMatrix);
+        solution1.calculateScore(distanceMatrix);
+        double greedyNNScore = solution1.getScore();
         minGreedyNNScore = std::min(minGreedyNNScore, greedyNNScore);
         maxGreedyNNScore = std::max(maxGreedyNNScore, greedyNNScore);
         totalGreedyNNScore += greedyNNScore;
@@ -521,7 +548,8 @@ void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // Apply greedyCycle algorithm
         Solution solution2 = greedyCycle(distanceMatrix);
-        double greedyCycleScore = calculateSolutionScore(solution2, distanceMatrix);
+        solution2.calculateScore(distanceMatrix);
+        double greedyCycleScore = solution2.getScore();
         minGreedyCycleScore = std::min(minGreedyCycleScore, greedyCycleScore);
         maxGreedyCycleScore = std::max(maxGreedyCycleScore, greedyCycleScore);
         totalGreedyCycleScore += greedyCycleScore;
@@ -535,7 +563,8 @@ void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // Apply regretCycle algorithm
         Solution solution3 = regretCycleWeighted(distanceMatrix, 0.0, 1.0);
-        double regretCycleScore = calculateSolutionScore(solution3, distanceMatrix);
+        solution3.calculateScore(distanceMatrix);
+        double regretCycleScore = solution3.getScore();
         minRegretCycleScore = std::min(minRegretCycleScore, regretCycleScore);
         maxRegretCycleScore = std::max(maxRegretCycleScore, regretCycleScore);
         totalRegretCycleScore += regretCycleScore;
@@ -549,7 +578,8 @@ void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // Apply regretCycleWeighted algorithm
         Solution solution4 = regretCycleWeighted(distanceMatrix, 1.0, 1.0);
-        double weightedRegretCycleScore = calculateSolutionScore(solution4, distanceMatrix);
+        solution4.calculateScore(distanceMatrix);
+        double weightedRegretCycleScore = solution4.getScore();
         minWeightedRegretCycleScore = std::min(minWeightedRegretCycleScore, weightedRegretCycleScore);
         maxWeightedRegretCycleScore = std::max(maxWeightedRegretCycleScore, weightedRegretCycleScore);
         totalWeightedRegretCycleScore += weightedRegretCycleScore;
@@ -603,6 +633,206 @@ void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
     std::cout << "Best RegretCycleWeighted Solution:" << std::endl;
     plotSolution(bestWeightedRegretCycleSolution, points, distanceMatrix);
+}
+
+Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
+{
+    Solution solution;
+    int n = distanceMatrix.size();
+
+    // Generate a shuffled list of indices
+    std::vector<int> indices(n);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::shuffle(indices.begin(), indices.end(), std::mt19937(std::random_device()()));
+
+    // Create a vector with half 0s and half 1s
+    std::vector<int> cycleAssignment(n, 0);
+    std::fill(cycleAssignment.begin() + n / 2, cycleAssignment.end(), 1);
+    std::shuffle(cycleAssignment.begin(), cycleAssignment.end(), std::mt19937(std::random_device()()));
+
+    // Assign points to cycles based on the cycleAssignment vector
+    for (int i = 0; i < n; ++i)
+    {
+        if (cycleAssignment[i] == 0)
+            solution.cycle1Indexes.push_back(indices[i]);
+        else
+            solution.cycle2Indexes.push_back(indices[i]);
+    }
+
+    return solution;
+}
+
+void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
+{
+    int iterations = 100;
+
+    /*
+        In this experiment, we evaluate different approaches to solving the 2-cycle TSP.
+        We have three independent choices, leading to 2^3 = 8 possible solution strategies:
+
+        1. **Starting Solution**
+           - `Random` (Completely randomized initial solution)
+           - `Greedy` (Constructed using a heuristic like Nearest Neighbor or Greedy Cycle)
+
+        2. **Local Search Strategy**
+           - `Steepest Descent` (Evaluates all possible improvements and picks the best one)
+           - `Greedy` (Applies the first improving move found)
+
+        3. **Modification Type**
+           - `Exchange Points` (Swaps individual points between cycles)
+           - `Exchange Edges` (Swaps entire edges to optimize the path)
+    */
+
+    // 1. Random + Steepest Descent + Point Exchange
+    double minRandomSteepestPointScore = std::numeric_limits<double>::max();
+    double maxRandomSteepestPointScore = std::numeric_limits<double>::lowest();
+    double totalRandomSteepestPointScore = 0.0;
+    Solution bestRandomSteepestPointSolution;
+
+    // 2. Random + Steepest Descent + Edge Exchange
+    double minRandomSteepestEdgeScore = std::numeric_limits<double>::max();
+    double maxRandomSteepestEdgeScore = std::numeric_limits<double>::lowest();
+    double totalRandomSteepestEdgeScore = 0.0;
+    Solution bestRandomSteepestEdgeSolution;
+
+    // 3. Random + Greedy Local Search + Point Exchange
+    double minRandomGreedyPointScore = std::numeric_limits<double>::max();
+    double maxRandomGreedyPointScore = std::numeric_limits<double>::lowest();
+    double totalRandomGreedyPointScore = 0.0;
+    Solution bestRandomGreedyPointSolution;
+
+    // 4. Random + Greedy Local Search + Edge Exchange
+    double minRandomGreedyEdgeScore = std::numeric_limits<double>::max();
+    double maxRandomGreedyEdgeScore = std::numeric_limits<double>::lowest();
+    double totalRandomGreedyEdgeScore = 0.0;
+    Solution bestRandomGreedyEdgeSolution;
+
+    // 5. Greedy + Steepest Descent + Point Exchange
+    double minGreedySteepestPointScore = std::numeric_limits<double>::max();
+    double maxGreedySteepestPointScore = std::numeric_limits<double>::lowest();
+    double totalGreedySteepestPointScore = 0.0;
+    Solution bestGreedySteepestPointSolution;
+
+    // 6. Greedy + Steepest Descent + Edge Exchange
+    double minGreedySteepestEdgeScore = std::numeric_limits<double>::max();
+    double maxGreedySteepestEdgeScore = std::numeric_limits<double>::lowest();
+    double totalGreedySteepestEdgeScore = 0.0;
+    Solution bestGreedySteepestEdgeSolution;
+
+    // 7. Greedy + Greedy Local Search + Point Exchange
+    double minGreedyGreedyPointScore = std::numeric_limits<double>::max();
+    double maxGreedyGreedyPointScore = std::numeric_limits<double>::lowest();
+    double totalGreedyGreedyPointScore = 0.0;
+    Solution bestGreedyGreedyPointSolution;
+
+    // 8. Greedy + Greedy Local Search + Edge Exchange
+    double minGreedyGreedyEdgeScore = std::numeric_limits<double>::max();
+    double maxGreedyGreedyEdgeScore = std::numeric_limits<double>::lowest();
+    double totalGreedyGreedyEdgeScore = 0.0;
+    Solution bestGreedyGreedyEdgeSolution;
+
+    // for (int i = 0; i < iterations; ++i)
+    // {
+    //     Solution initialRandom = randomCycle(distanceMatrix);
+    //     Solution initialGreedy = regretCycleWeighted(distanceMatrix, 1.0, 1.0); // This approach was giving the best results for lab1
+    //     // Apply greedyNearestNeighbour algorithm
+    //     Solution solution1 = greedyNearestNeighbour(distanceMatrix);
+    //     double greedyNNScore = calculateSolutionScore(solution1, distanceMatrix);
+    //     minGreedyNNScore = std::min(minGreedyNNScore, greedyNNScore);
+    //     maxGreedyNNScore = std::max(maxGreedyNNScore, greedyNNScore);
+    //     totalGreedyNNScore += greedyNNScore;
+
+    //     // Check for best solution for GreedyNN
+    //     if (greedyNNScore == minGreedyNNScore)
+    //     {
+    //         minGreedyNNScore = greedyNNScore;
+    //         bestGreedyNNSolution = solution1;
+    //     }
+
+    //     // Apply greedyCycle algorithm
+    //     Solution solution2 = greedyCycle(distanceMatrix);
+    //     double greedyCycleScore = calculateSolutionScore(solution2, distanceMatrix);
+    //     minGreedyCycleScore = std::min(minGreedyCycleScore, greedyCycleScore);
+    //     maxGreedyCycleScore = std::max(maxGreedyCycleScore, greedyCycleScore);
+    //     totalGreedyCycleScore += greedyCycleScore;
+
+    //     // Check for best solution for GreedyCycle
+    //     if (greedyCycleScore == minGreedyCycleScore)
+    //     {
+    //         minGreedyCycleScore = greedyCycleScore;
+    //         bestGreedyCycleSolution = solution2;
+    //     }
+
+    //     // Apply regretCycle algorithm
+    //     Solution solution3 = regretCycleWeighted(distanceMatrix, 0.0, 1.0);
+    //     double regretCycleScore = calculateSolutionScore(solution3, distanceMatrix);
+    //     minRegretCycleScore = std::min(minRegretCycleScore, regretCycleScore);
+    //     maxRegretCycleScore = std::max(maxRegretCycleScore, regretCycleScore);
+    //     totalRegretCycleScore += regretCycleScore;
+
+    //     // Check for best solution for RegretCycle
+    //     if (regretCycleScore == minRegretCycleScore)
+    //     {
+    //         minRegretCycleScore = regretCycleScore;
+    //         bestRegretCycleSolution = solution3;
+    //     }
+
+    //     // Apply regretCycleWeighted algorithm
+    //     Solution solution4 = regretCycleWeighted(distanceMatrix, 1.0, 1.0);
+    //     double weightedRegretCycleScore = calculateSolutionScore(solution4, distanceMatrix);
+    //     minWeightedRegretCycleScore = std::min(minWeightedRegretCycleScore, weightedRegretCycleScore);
+    //     maxWeightedRegretCycleScore = std::max(maxWeightedRegretCycleScore, weightedRegretCycleScore);
+    //     totalWeightedRegretCycleScore += weightedRegretCycleScore;
+
+    //     // Check for best solution for RegretCycleWeighted
+    //     if (weightedRegretCycleScore == minWeightedRegretCycleScore)
+    //     {
+    //         minWeightedRegretCycleScore = weightedRegretCycleScore;
+    //         bestWeightedRegretCycleSolution = solution4;
+    //     }
+    // }
+
+    // // Calculate average scores for each algorithm
+    // double avgGreedyNNScore = totalGreedyNNScore / iterations;
+    // double avgGreedyCycleScore = totalGreedyCycleScore / iterations;
+    // double avgRegretCycleScore = totalRegretCycleScore / iterations;
+    // double avgWeightedRegretCycleScore = totalWeightedRegretCycleScore / iterations;
+
+    // // Print results for each algorithm
+    // std::cout << "\nGreedyNearestNeighbour Algorithm Results:" << std::endl;
+    // std::cout << "Min Score: " << minGreedyNNScore << std::endl;
+    // std::cout << "Max Score: " << maxGreedyNNScore << std::endl;
+    // std::cout << "Average Score: " << avgGreedyNNScore << std::endl;
+
+    // std::cout << "\nGreedyCycle Algorithm Results:" << std::endl;
+    // std::cout << "Min Score: " << minGreedyCycleScore << std::endl;
+    // std::cout << "Max Score: " << maxGreedyCycleScore << std::endl;
+    // std::cout << "Average Score: " << avgGreedyCycleScore << std::endl;
+
+    // std::cout << "\nRegretCycle Algorithm Results:" << std::endl;
+    // std::cout << "Min Score: " << minRegretCycleScore << std::endl;
+    // std::cout << "Max Score: " << maxRegretCycleScore << std::endl;
+    // std::cout << "Average Score: " << avgRegretCycleScore << std::endl;
+
+    // std::cout << "\nRegretCycleWeighted Algorithm Results:" << std::endl;
+    // std::cout << "Min Score: " << minWeightedRegretCycleScore << std::endl;
+    // std::cout << "Max Score: " << maxWeightedRegretCycleScore << std::endl;
+    // std::cout << "Average Score: " << avgWeightedRegretCycleScore << std::endl;
+
+    // // Plot best solutions for each algorithm
+    // std::cout << "\nPlotting Best Solutions:" << std::endl;
+
+    // std::cout << "Best GreedyNearestNeighbour Solution:" << std::endl;
+    // plotSolution(bestGreedyNNSolution, points, distanceMatrix);
+
+    // std::cout << "Best GreedyCycle Solution:" << std::endl;
+    // plotSolution(bestGreedyCycleSolution, points, distanceMatrix);
+
+    // std::cout << "Best RegretCycle Solution:" << std::endl;
+    // plotSolution(bestRegretCycleSolution, points, distanceMatrix);
+
+    // std::cout << "Best RegretCycleWeighted Solution:" << std::endl;
+    // plotSolution(bestWeightedRegretCycleSolution, points, distanceMatrix);
 }
 
 int main(int argc, char *argv[])

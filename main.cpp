@@ -931,7 +931,7 @@ Solution localSearchEdges(Solution solution, const std::vector<std::vector<doubl
     return solution;
 }
 
-Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, int iterations = 1000)
+Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, int timeLimit = 1000)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -946,7 +946,9 @@ Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &
     size_t pointsInCycle2 = solution.cycleIndices[1].size();
     std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
 
-    for (int iter = 0; iter < iterations; ++iter)
+    auto t1 = std::chrono::high_resolution_clock::now();
+    long runtime = 0;
+    while(runtime < timeLimit)
     {
         Solution tempSolution = currentSolution;
         std::uniform_int_distribution<int> choiceDist(0, 1);
@@ -1017,6 +1019,8 @@ Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &
         }
 
         currentSolution = tempSolution; // Update current solution for the next iteration
+        auto t2 = std::chrono::high_resolution_clock::now();
+        runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
     }
 
     return bestSolution;
@@ -1142,7 +1146,7 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // 0. Random Walk 1
         auto t1 = std::chrono::high_resolution_clock::now();
-        Solution solution0 = randomWalk(initialRandom, distanceMatrix);
+        Solution solution0 = randomWalk(initialRandom, distanceMatrix, 236);
         auto t2 = std::chrono::high_resolution_clock::now();
 
         solution0.calculateScore(distanceMatrix);
@@ -1232,7 +1236,7 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // 5. Random Walk 2
         t1 = std::chrono::high_resolution_clock::now();
-        Solution solution5 = randomWalk(initialGreedy, distanceMatrix);
+        Solution solution5 = randomWalk(initialGreedy, distanceMatrix, 236);
         t2 = std::chrono::high_resolution_clock::now();
 
         solution5.calculateScore(distanceMatrix);

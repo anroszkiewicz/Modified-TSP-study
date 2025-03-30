@@ -7,6 +7,7 @@
 #include <ctime>
 #include <limits>
 #include <random>
+#include <chrono>
 #include "matplotlibcpp.h"
 
 namespace plt = matplotlibcpp;
@@ -447,21 +448,21 @@ void plotSolution(Solution &solution, const std::vector<Point> &points, const st
     double totalDistance = cycle1Distance + cycle2Distance;
 
     // Print cycles and distances to console
-    std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
-    for (int index : solution.cycleIndices[0])
-    {
-        std::cout << index << " ";
-    }
-    std::cout << "\nTotal Distance: " << cycle1Distance << std::endl;
+    // std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
+    // for (int index : solution.cycleIndices[0])
+    // {
+    //     std::cout << index << " ";
+    // }
+    // std::cout << "\nTotal Distance: " << cycle1Distance << std::endl;
 
-    std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
-    for (int index : solution.cycleIndices[1])
-    {
-        std::cout << index << " ";
-    }
-    std::cout << "\nTotal Distance: " << cycle2Distance << std::endl;
+    // std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
+    // for (int index : solution.cycleIndices[1])
+    // {
+    //     std::cout << index << " ";
+    // }
+    // std::cout << "\nTotal Distance: " << cycle2Distance << std::endl;
 
-    std::cout << "Total Distance for both cycles: " << totalDistance << std::endl;
+    // std::cout << "Total Distance for both cycles: " << totalDistance << std::endl;
 
     // Prepare data for plotting
     std::vector<double> x_coords, y_coords;
@@ -1047,30 +1048,45 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     double maxRandomWalk1 = std::numeric_limits<double>::lowest();
     double totalRandomWalk1 = 0.0;
     Solution bestRandomWalk1;
+    long minRandomWalk1time = std::numeric_limits<long>::max();
+    long maxRandomWalk1time = std::numeric_limits<long>::lowest();
+    long totalRandomWalk1time = 0.0;
 
     // 1. Random + Steepest Descent + Point Exchange
     double minRandomSteepestPointScore = std::numeric_limits<double>::max();
     double maxRandomSteepestPointScore = std::numeric_limits<double>::lowest();
     double totalRandomSteepestPointScore = 0.0;
     Solution bestRandomSteepestPointSolution;
+    long minRandomSteepestPointTime = std::numeric_limits<long>::max();
+    long maxRandomSteepestPointTime = std::numeric_limits<long>::lowest();
+    long totalRandomSteepestPointTime = 0.0;
 
     // 2. Random + Steepest Descent + Edge Exchange
     double minRandomSteepestEdgeScore = std::numeric_limits<double>::max();
     double maxRandomSteepestEdgeScore = std::numeric_limits<double>::lowest();
     double totalRandomSteepestEdgeScore = 0.0;
     Solution bestRandomSteepestEdgeSolution;
+    long minRandomSteepestEdgeTime = std::numeric_limits<long>::max();
+    long maxRandomSteepestEdgeTime = std::numeric_limits<long>::lowest();
+    long totalRandomSteepestEdgeTime = 0.0;
 
     // 3. Random + Greedy Local Search + Point Exchange
     double minRandomGreedyPointScore = std::numeric_limits<double>::max();
     double maxRandomGreedyPointScore = std::numeric_limits<double>::lowest();
     double totalRandomGreedyPointScore = 0.0;
     Solution bestRandomGreedyPointSolution;
+    long minRandomGreedyPointTime = std::numeric_limits<long>::max();
+    long maxRandomGreedyPointTime = std::numeric_limits<long>::lowest();
+    long totalRandomGreedyPointTime = 0.0;
 
     // 4. Random + Greedy Local Search + Edge Exchange
     double minRandomGreedyEdgeScore = std::numeric_limits<double>::max();
     double maxRandomGreedyEdgeScore = std::numeric_limits<double>::lowest();
     double totalRandomGreedyEdgeScore = 0.0;
     Solution bestRandomGreedyEdgeSolution;
+    long minRandomGreedyEdgeTime = std::numeric_limits<long>::max();
+    long maxRandomGreedyEdgeTime = std::numeric_limits<long>::lowest();
+    long totalRandomGreedyEdgeTime = 0.0;
 
     // 5. Random Walk (before all greedy-based approaches)
     double minRandomWalk2 = std::numeric_limits<double>::max();
@@ -1083,24 +1099,36 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     double maxGreedySteepestPointScore = std::numeric_limits<double>::lowest();
     double totalGreedySteepestPointScore = 0.0;
     Solution bestGreedySteepestPointSolution;
+    long minGreedySteepestPointTime = std::numeric_limits<long>::max();
+    long maxGreedySteepestPointTime = std::numeric_limits<long>::lowest();
+    long totalGreedySteepestPointTime = 0.0;
 
     // 7. Greedy + Steepest Descent + Edge Exchange
     double minGreedySteepestEdgeScore = std::numeric_limits<double>::max();
     double maxGreedySteepestEdgeScore = std::numeric_limits<double>::lowest();
     double totalGreedySteepestEdgeScore = 0.0;
     Solution bestGreedySteepestEdgeSolution;
+    long minGreedySteepestEdgeTime = std::numeric_limits<long>::max();
+    long maxGreedySteepestEdgeTime = std::numeric_limits<long>::lowest();
+    long totalGreedySteepestEdgeTime = 0.0;
 
     // 8. Greedy + Greedy Local Search + Point Exchange
     double minGreedyGreedyPointScore = std::numeric_limits<double>::max();
     double maxGreedyGreedyPointScore = std::numeric_limits<double>::lowest();
     double totalGreedyGreedyPointScore = 0.0;
     Solution bestGreedyGreedyPointSolution;
+    long minGreedyGreedyPointTime = std::numeric_limits<long>::max();
+    long maxGreedyGreedyPointTime = std::numeric_limits<long>::lowest();
+    long totalGreedyGreedyPointTime = 0.0;
 
     // 9. Greedy + Greedy Local Search + Edge Exchange
     double minGreedyGreedyEdgeScore = std::numeric_limits<double>::max();
     double maxGreedyGreedyEdgeScore = std::numeric_limits<double>::lowest();
     double totalGreedyGreedyEdgeScore = 0.0;
     Solution bestGreedyGreedyEdgeSolution;
+    long minGreedyGreedyEdgeTime = std::numeric_limits<long>::max();
+    long maxGreedyGreedyEdgeTime = std::numeric_limits<long>::lowest();
+    long totalGreedyGreedyEdgeTime = 0.0;
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
@@ -1113,7 +1141,10 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         Solution initialGreedy = regretCycleWeighted(distanceMatrix, 1.0, 1.0);
 
         // 0. Random Walk 1
+        auto t1 = std::chrono::high_resolution_clock::now();
         Solution solution0 = randomWalk(initialRandom, distanceMatrix);
+        auto t2 = std::chrono::high_resolution_clock::now();
+
         solution0.calculateScore(distanceMatrix);
         double score0 = solution0.getScore();
         minRandomWalk1 = std::min(minRandomWalk1, score0);
@@ -1122,8 +1153,16 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score0 == minRandomWalk1)
             bestRandomWalk1 = solution0;
 
+        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minRandomWalk1time = std::min(minRandomWalk1time, time0);
+        maxRandomWalk1time = std::max(maxRandomWalk1time, time0);
+        totalRandomWalk1time += time0;
+
         // 1. Random + Steepest Descent + Point Exchange
+        t1 = std::chrono::high_resolution_clock::now();
         Solution solution1 = localSearchVertex(initialRandom, distanceMatrix, "steepest");
+        t2 = std::chrono::high_resolution_clock::now();
+
         solution1.calculateScore(distanceMatrix);
         double score1 = solution1.getScore();
         minRandomSteepestPointScore = std::min(minRandomSteepestPointScore, score1);
@@ -1132,8 +1171,16 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score1 == minRandomSteepestPointScore)
             bestRandomSteepestPointSolution = solution1;
 
+        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minRandomSteepestPointTime = std::min(minRandomSteepestPointTime, time1);
+        maxRandomSteepestPointTime = std::max(maxRandomSteepestPointTime, time1);
+        totalRandomSteepestPointTime += time1;
+
         // 2. Random + Steepest Descent + Edge Exchange
+        t1 = std::chrono::high_resolution_clock::now();
         Solution solution2 = localSearchEdges(initialRandom, distanceMatrix, "steepest");
+        t2 = std::chrono::high_resolution_clock::now();
+
         solution2.calculateScore(distanceMatrix);
         double score2 = solution2.getScore();
         minRandomSteepestEdgeScore = std::min(minRandomSteepestEdgeScore, score2);
@@ -1142,8 +1189,16 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score2 == minRandomSteepestEdgeScore)
             bestRandomSteepestEdgeSolution = solution2;
 
+        auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minRandomSteepestEdgeTime = std::min(minRandomSteepestEdgeTime, time2);
+        maxRandomSteepestEdgeTime = std::max(maxRandomSteepestEdgeTime, time2);
+        totalRandomSteepestEdgeTime += time2;
+
         // 3. Random + Greedy Local Search + Point Exchange
+        t1 = std::chrono::high_resolution_clock::now();
         Solution solution3 = localSearchVertex(initialRandom, distanceMatrix, "greedy");
+        t2 = std::chrono::high_resolution_clock::now();
+
         solution3.calculateScore(distanceMatrix);
         double score3 = solution3.getScore();
         minRandomGreedyPointScore = std::min(minRandomGreedyPointScore, score3);
@@ -1152,8 +1207,16 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score3 == minRandomGreedyPointScore)
             bestRandomGreedyPointSolution = solution3;
 
+        auto time3 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minRandomGreedyPointTime = std::min(minRandomGreedyPointTime, time3);
+        maxRandomGreedyPointTime = std::max(maxRandomGreedyPointTime, time3);
+        totalRandomGreedyPointTime += time3;
+
         // 4. Random + Greedy Local Search + Edge Exchange
+        t1 = std::chrono::high_resolution_clock::now();
         Solution solution4 = localSearchEdges(initialRandom, distanceMatrix, "greedy");
+        t2 = std::chrono::high_resolution_clock::now();
+
         solution4.calculateScore(distanceMatrix);
         double score4 = solution4.getScore();
         minRandomGreedyEdgeScore = std::min(minRandomGreedyEdgeScore, score4);
@@ -1162,8 +1225,16 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score4 == minRandomGreedyEdgeScore)
             bestRandomGreedyEdgeSolution = solution4;
 
+        auto time4 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minRandomGreedyEdgeTime = std::min(minRandomGreedyEdgeTime, time4);
+        maxRandomGreedyEdgeTime = std::max(maxRandomGreedyEdgeTime, time4);
+        totalRandomGreedyEdgeTime += time4;
+
         // 5. Random Walk 2
+        t1 = std::chrono::high_resolution_clock::now();
         Solution solution5 = randomWalk(initialGreedy, distanceMatrix);
+        t2 = std::chrono::high_resolution_clock::now();
+
         solution5.calculateScore(distanceMatrix);
         double score5 = solution5.getScore();
         minRandomWalk2 = std::min(minRandomWalk2, score5);
@@ -1172,8 +1243,13 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score5 == minRandomWalk2)
             bestRandomWalk2 = solution5;
 
+        auto time5 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+
         // 6. Greedy + Steepest Descent + Point Exchange
+        t1 = std::chrono::high_resolution_clock::now();
         Solution solution6 = localSearchVertex(initialGreedy, distanceMatrix, "steepest");
+        t2 = std::chrono::high_resolution_clock::now();
+
         solution6.calculateScore(distanceMatrix);
         double score6 = solution6.getScore();
         minGreedySteepestPointScore = std::min(minGreedySteepestPointScore, score6);
@@ -1182,8 +1258,16 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score6 == minGreedySteepestPointScore)
             bestGreedySteepestPointSolution = solution6;
 
+        auto time6 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minGreedySteepestPointTime = std::min(minGreedySteepestPointTime, time6);
+        maxGreedySteepestPointTime = std::max(maxGreedySteepestPointTime, time6);
+        totalGreedySteepestPointTime += time6;
+
         // 7. Greedy + Steepest Descent + Edge Exchange
+        t1 = std::chrono::high_resolution_clock::now();
         Solution solution7 = localSearchEdges(initialGreedy, distanceMatrix, "steepest");
+        t2 = std::chrono::high_resolution_clock::now();
+
         solution7.calculateScore(distanceMatrix);
         double score7 = solution7.getScore();
         minGreedySteepestEdgeScore = std::min(minGreedySteepestEdgeScore, score7);
@@ -1192,8 +1276,16 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score7 == minGreedySteepestEdgeScore)
             bestGreedySteepestEdgeSolution = solution7;
 
+        auto time7 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minGreedySteepestEdgeTime = std::min(minGreedySteepestEdgeTime, time7);
+        maxGreedySteepestEdgeTime = std::max(maxGreedySteepestEdgeTime, time7);
+        totalGreedySteepestEdgeTime += time7;
+
         // 8. Greedy + Greedy Local Search + Point Exchange
+        t1 = std::chrono::high_resolution_clock::now();
         Solution solution8 = localSearchVertex(initialGreedy, distanceMatrix, "greedy");
+        t2 = std::chrono::high_resolution_clock::now();
+
         solution8.calculateScore(distanceMatrix);
         double score8 = solution8.getScore();
         minGreedyGreedyPointScore = std::min(minGreedyGreedyPointScore, score8);
@@ -1202,8 +1294,16 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score8 == minGreedyGreedyPointScore)
             bestGreedyGreedyPointSolution = solution8;
 
+        auto time8 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minGreedyGreedyPointTime = std::min(minGreedyGreedyPointTime, time8);
+        maxGreedyGreedyPointTime = std::max(maxGreedyGreedyPointTime, time8);
+        totalGreedyGreedyPointTime += time8;
+
         // 9. Greedy + Greedy Local Search + Edge Exchange
+        t1 = std::chrono::high_resolution_clock::now();
         Solution solution9 = localSearchEdges(initialGreedy, distanceMatrix, "greedy");
+        t2 = std::chrono::high_resolution_clock::now();
+
         solution9.calculateScore(distanceMatrix);
         double score9 = solution9.getScore();
         minGreedyGreedyEdgeScore = std::min(minGreedyGreedyEdgeScore, score9);
@@ -1211,32 +1311,47 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         totalGreedyGreedyEdgeScore += score9;
         if (score9 == minGreedyGreedyEdgeScore)
             bestGreedyGreedyEdgeSolution = solution9;
+
+        auto time9 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minGreedyGreedyEdgeTime = std::min(minGreedyGreedyEdgeTime, time9);
+        maxGreedyGreedyEdgeTime = std::max(maxGreedyGreedyEdgeTime, time9);
+        totalGreedyGreedyEdgeTime += time9;
     }
 
     // Print results
     std::cout << "\nRandom Walk 1:\n";
     std::cout << "Min: " << minRandomWalk1 << " Max: " << maxRandomWalk1
               << " Avg: " << (totalRandomWalk1 / iterations) << "\n";
+    std::cout << "Min: " << minRandomWalk1time << " Max: " << maxRandomWalk1time
+              << " Avg: " << (totalRandomWalk1time / iterations) << "\n";
     plotSolution(bestRandomWalk1, points, distanceMatrix, "Random Walk 1");
 
     std::cout << "\nRandom + Steepest Descent + Point Exchange:\n";
     std::cout << "Min: " << minRandomSteepestPointScore << " Max: " << maxRandomSteepestPointScore
               << " Avg: " << (totalRandomSteepestPointScore / iterations) << "\n";
-    plotSolution(bestRandomSteepestPointSolution, points, distanceMatrix, "Random + Steepest Descent + Point Exchange");
+    std::cout << "Min: " << minRandomSteepestPointTime << " Max: " << maxRandomSteepestPointTime
+              << " Avg: " << (totalRandomSteepestPointTime / iterations) << "\n";
+    plotSolution(bestRandomSteepestPointSolution, points, distanceMatrix, "Random + Steepest Descent + Vertex Exchange");
 
     std::cout << "\nRandom + Steepest Descent + Edge Exchange:\n";
     std::cout << "Min: " << minRandomSteepestEdgeScore << " Max: " << maxRandomSteepestEdgeScore
               << " Avg: " << (totalRandomSteepestEdgeScore / iterations) << "\n";
+    std::cout << "Min: " << minRandomSteepestEdgeTime << " Max: " << maxRandomSteepestEdgeTime
+              << " Avg: " << (totalRandomSteepestEdgeTime / iterations) << "\n";
     plotSolution(bestRandomSteepestEdgeSolution, points, distanceMatrix, "Random + Steepest Descent + Edge Exchange");
 
     std::cout << "\nRandom + Greedy Local Search + Point Exchange:\n";
     std::cout << "Min: " << minRandomGreedyPointScore << " Max: " << maxRandomGreedyPointScore
               << " Avg: " << (totalRandomGreedyPointScore / iterations) << "\n";
-    plotSolution(bestRandomGreedyPointSolution, points, distanceMatrix, "Random + Greedy Local Search + Point Exchange");
+    std::cout << "Min: " << minRandomGreedyPointTime << " Max: " << maxRandomGreedyPointTime
+              << " Avg: " << (totalRandomGreedyPointTime / iterations) << "\n";
+    plotSolution(bestRandomGreedyPointSolution, points, distanceMatrix, "Random + Greedy Local Search + Vertex Exchange");
 
     std::cout << "\nRandom + Greedy Local Search + Edge Exchange:\n";
     std::cout << "Min: " << minRandomGreedyEdgeScore << " Max: " << maxRandomGreedyEdgeScore
               << " Avg: " << (totalRandomGreedyEdgeScore / iterations) << "\n";
+    std::cout << "Min: " << minRandomGreedyEdgeTime << " Max: " << maxRandomGreedyEdgeTime
+              << " Avg: " << (totalRandomGreedyEdgeTime / iterations) << "\n";
     plotSolution(bestRandomGreedyEdgeSolution, points, distanceMatrix, "Random + Greedy Local Search + Edge Exchange");
 
     std::cout << "\nRandom Walk 2:\n";
@@ -1247,21 +1362,29 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     std::cout << "\nGreedy + Steepest Descent + Point Exchange:\n";
     std::cout << "Min: " << minGreedySteepestPointScore << " Max: " << maxGreedySteepestPointScore
               << " Avg: " << (totalGreedySteepestPointScore / iterations) << "\n";
-    plotSolution(bestGreedySteepestPointSolution, points, distanceMatrix, "Greedy + Steepest Descent + Point Exchange");
+    std::cout << "Min: " << minGreedySteepestPointTime << " Max: " << maxGreedySteepestPointTime
+              << " Avg: " << (totalGreedySteepestPointTime / iterations) << "\n";
+    plotSolution(bestGreedySteepestPointSolution, points, distanceMatrix, "Greedy + Steepest Descent + Vertex Exchange");
 
     std::cout << "\nGreedy + Steepest Descent + Edge Exchange:\n";
     std::cout << "Min: " << minGreedySteepestEdgeScore << " Max: " << maxGreedySteepestEdgeScore
               << " Avg: " << (totalGreedySteepestEdgeScore / iterations) << "\n";
+    std::cout << "Min: " << minGreedySteepestEdgeTime << " Max: " << maxGreedySteepestEdgeTime
+              << " Avg: " << (totalGreedySteepestEdgeTime / iterations) << "\n";
     plotSolution(bestGreedySteepestEdgeSolution, points, distanceMatrix, "Greedy + Steepest Descent + Edge Exchange");
 
     std::cout << "\nGreedy + Greedy Local Search + Point Exchange:\n";
     std::cout << "Min: " << minGreedyGreedyPointScore << " Max: " << maxGreedyGreedyPointScore
               << " Avg: " << (totalGreedyGreedyPointScore / iterations) << "\n";
-    plotSolution(bestGreedyGreedyPointSolution, points, distanceMatrix, "Greedy + Greedy Local Search + Point Exchange");
+    std::cout << "Min: " << minGreedyGreedyPointTime << " Max: " << maxGreedyGreedyPointTime
+              << " Avg: " << (totalGreedyGreedyPointTime / iterations) << "\n";
+    plotSolution(bestGreedyGreedyPointSolution, points, distanceMatrix, "Greedy + Greedy Local Search + Vertex Exchange");
 
     std::cout << "\nGreedy + Greedy Local Search + Edge Exchange:\n";
     std::cout << "Min: " << minGreedyGreedyEdgeScore << " Max: " << maxGreedyGreedyEdgeScore
               << " Avg: " << (totalGreedyGreedyEdgeScore / iterations) << "\n";
+    std::cout << "Min: " << minGreedyGreedyEdgeTime << " Max: " << maxGreedyGreedyEdgeTime
+              << " Avg: " << (totalGreedyGreedyEdgeTime / iterations) << "\n";
     plotSolution(bestGreedyGreedyEdgeSolution, points, distanceMatrix, "Greedy + Greedy Local Search + Edge Exchange");
 }
 

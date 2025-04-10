@@ -8,6 +8,7 @@
 #include <limits>
 #include <random>
 #include <chrono>
+#include <queue>
 #include "matplotlibcpp.h"
 
 namespace plt = matplotlibcpp;
@@ -23,6 +24,9 @@ struct Solution
     double cycle1Score;
     double cycle2Score;
     double score;
+
+    // pointPositions[i] = {cycleIndex, positionInCycle}
+    std::vector<std::pair<int, int>> pointPositions;
 
     Solution() : cycle1Score(0.0), cycle2Score(0.0), score(0.0) {}
 
@@ -66,6 +70,55 @@ struct Solution
             totalDistance += distanceMatrix[current][next];
         }
         return totalDistance;
+    }
+
+    void updatePointPositions()
+    {
+        int totalPoints = cycleIndices[0].size() + cycleIndices[1].size();
+        pointPositions.clear();
+        pointPositions.resize(totalPoints, {-1, -1});
+
+        for (int cycle = 0; cycle < 2; ++cycle)
+        {
+            for (int pos = 0; pos < cycleIndices[cycle].size(); ++pos)
+            {
+                int point = cycleIndices[cycle][pos];
+                pointPositions[point] = {cycle, pos};
+            }
+        }
+    }
+
+    std::pair<int, int> getPointPosition(int pointIndex) const
+    {
+        return pointPositions[pointIndex];
+    }
+};
+
+enum moveType
+{
+    VERTEX = 0,
+    EDGE = 1
+};
+
+struct Move
+{
+    moveType type;
+    int point1, point2;
+    int prev1, next1;
+    int prev2, next2;
+    double delta;
+
+    Move(moveType type, int point1, int point2,
+         int prev1, int next1, int prev2, int next2,
+         double delta)
+        : type(type), point1(point1), point2(point2),
+          prev1(prev1), next1(next1), prev2(prev2), next2(next2),
+          delta(delta) {}
+
+    // Smallest delta = highest priority)
+    bool operator<(const Move &other) const
+    {
+        return delta > other.delta;
     }
 };
 
@@ -229,7 +282,7 @@ Solution greedyNearestNeighbour(const std::vector<std::vector<double>> &distance
             current2 = nextPoint;
         }
     }
-
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -316,7 +369,7 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
             current2 = nextPoint;
         }
     }
-
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -423,7 +476,7 @@ Solution regretCycleWeighted(const std::vector<std::vector<double>> &distanceMat
             solution.cycleIndices[1].insert(solution.cycleIndices[1].begin() + bestInsertPos, nextPoint);
         }
     }
-
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -645,7 +698,7 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
         else
             solution.cycleIndices[1].push_back(indices[i]);
     }
-
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -897,6 +950,7 @@ Solution localSearchVertex(Solution solution, const std::vector<std::vector<doub
     {
         improvement = stepPointExchange(solution, distanceMatrix, strategy);
     }
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -928,6 +982,7 @@ Solution localSearchEdges(Solution solution, const std::vector<std::vector<doubl
     {
         improvement = stepEdgeExchange(solution, distanceMatrix, strategy);
     }
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -1022,7 +1077,7 @@ Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &
         auto t2 = std::chrono::high_resolution_clock::now();
         runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
     }
-
+    bestSolution.updatePointPositions();
     return bestSolution;
 }
 
@@ -1393,11 +1448,67 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
 Solution localSearchMemory(Solution solution, const std::vector<std::vector<double>> &distanceMatrix)
 {
+    std::priority_queue<Move> pq;
+    // Push all the legal moves to the queue
+    const double epsilon = 1e-6; // Avoid numerical errors
+    size_t numberOfPoints = distanceMatrix.size();
+    size_t pointsInCycle1 = solution.cycleIndices[0].size(); // Size of first cycle
+    size_t pointsInCycle2 = solution.cycleIndices[1].size(); // Size of second cycle
+    std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
+
+    int point1;
+    int point2;
+    int cycleOfPoint1 = 0;
+    int cycleOfPoint2 = 1;
+
+    // Loop over each pair of points from different cycles in the solution
+    for (size_t i = 0; i < pointsInCycle1; ++i)
+    {
+        for (size_t j = pointsInCycle1; j < numberOfPoints; ++j)
+        {
+            double delta = 0;
+            // Get all the neighbours of point 1
+            int next1;
+            int prev1;
+            point1 = solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1];
+            next1 = solution.cycleIndices[cycleOfPoint1][(i + 1) % cycleSizes[cycleOfPoint1]];
+            prev1 = solution.cycleIndices[cycleOfPoint1][(i - 1 + cycleSizes[cycleOfPoint1]) % cycleSizes[cycleOfPoint1]];
+            // Get all the neighbours of point 2
+            int next2;
+            int prev2;
+            point2 = solution.cycleIndices[cycleOfPoint2][j % pointsInCycle1];
+            next2 = solution.cycleIndices[cycleOfPoint2][(j + 1) % cycleSizes[cycleOfPoint2]];
+            prev2 = solution.cycleIndices[cycleOfPoint2][(j - 1 + cycleSizes[cycleOfPoint2]) % cycleSizes[cycleOfPoint2]];
+            // Calculate delta
+            delta -= distanceMatrix[point1][next1];
+            delta -= distanceMatrix[point1][prev1];
+            delta -= distanceMatrix[point2][next2];
+            delta -= distanceMatrix[point2][prev2];
+            delta += distanceMatrix[point1][next2];
+            delta += distanceMatrix[point1][prev2];
+            delta += distanceMatrix[point2][next1];
+            delta += distanceMatrix[point2][prev1];
+            pq.push(Move(VERTEX, point1, point2, prev1, next1, prev2, next2, delta));
+        }
+    }
+    while (!pq.empty())
+    {
+        Move best = pq.top();
+        pq.pop();
+        if (best.type == moveType::VERTEX)
+        {
+            // Check legality
+        }
+    }
+
     return solution;
 }
 
 Solution localSearchCandidates(Solution solution, const std::vector<std::vector<double>> &distanceMatrix)
 {
+    std::priority_queue<Move> pq;
+
+    // Move best = pq.top(); // będzie miał najmniejsze delta
     return solution;
 }
 

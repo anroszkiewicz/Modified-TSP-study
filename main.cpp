@@ -597,22 +597,22 @@ void plotSolution(Solution &solution, const std::vector<Point> &points, const st
     double cycle2Distance = solution.getCycle2Score(distanceMatrix);
     double totalDistance = cycle1Distance + cycle2Distance;
 
-    // // Print cycles and distances to console
-    // std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
-    // for (int index : solution.cycleIndices[0])
-    // {
-    //     std::cout << index << " ";
-    // }
-    // std::cout << "\nTotal Distance: " << cycle1Distance << std::endl;
+    // Print cycles and distances to console
+    std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
+    for (int index : solution.cycleIndices[0])
+    {
+        std::cout << index << " ";
+    }
+    std::cout << "\nTotal Distance: " << cycle1Distance << std::endl;
 
-    // std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
-    // for (int index : solution.cycleIndices[1])
-    // {
-    //     std::cout << index << " ";
-    // }
-    // std::cout << "\nTotal Distance: " << cycle2Distance << std::endl;
+    std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
+    for (int index : solution.cycleIndices[1])
+    {
+        std::cout << index << " ";
+    }
+    std::cout << "\nTotal Distance: " << cycle2Distance << std::endl;
 
-    // std::cout << "Total Distance for both cycles: " << totalDistance << std::endl;
+    std::cout << "Total Distance for both cycles: " << totalDistance << std::endl;
 
     // Prepare data for plotting
     std::vector<double> x_coords, y_coords;
@@ -930,54 +930,54 @@ bool stepEdgeExchange(Solution &solution, const std::vector<std::vector<double>>
     Move bestMove;
     // Add vertex swap between 2 cycles
     // For some reason it should always be a legal move
-    // for (size_t i = 0; i < pointsInCycle1; ++i)
-    // {
-    //     for (size_t j = 0; j < pointsInCycle2; ++j)
-    //     {
-    //         double delta = 0;
-    //         // Get all the neighbours of point 1
-    //         int next1;
-    //         int prev1;
-    //         point1 = solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1];
-    //         next1 = solution.cycleIndices[cycleOfPoint1][(i + 1) % cycleSizes[cycleOfPoint1]];
-    //         prev1 = solution.cycleIndices[cycleOfPoint1][(i - 1 + cycleSizes[cycleOfPoint1]) % cycleSizes[cycleOfPoint1]];
-    //         // Get all the neighbours of point 2
-    //         int next2;
-    //         int prev2;
-    //         point2 = solution.cycleIndices[cycleOfPoint2][j % pointsInCycle1];
-    //         next2 = solution.cycleIndices[cycleOfPoint2][(j + 1) % cycleSizes[cycleOfPoint2]];
-    //         prev2 = solution.cycleIndices[cycleOfPoint2][(j - 1 + cycleSizes[cycleOfPoint2]) % cycleSizes[cycleOfPoint2]];
-    //         // Calculate delta
-    //         delta -= distanceMatrix[point1][next1];
-    //         delta -= distanceMatrix[point1][prev1];
-    //         delta -= distanceMatrix[point2][next2];
-    //         delta -= distanceMatrix[point2][prev2];
-    //         delta += distanceMatrix[point1][next2];
-    //         delta += distanceMatrix[point1][prev2];
-    //         delta += distanceMatrix[point2][next1];
-    //         delta += distanceMatrix[point2][prev1];
-    //         // Only add moves that can improve the solution
-    //         if (strategy == "greedy" && delta < -epsilon)
-    //         {
-    //             int pos1 = i;
-    //             int pos2 = j;
-    //             // Ensure the points are in separate cycles
-    //             if (cycleOfPoint1 != cycleOfPoint2)
-    //             {
-    //                 std::swap(solution.cycleIndices[cycleOfPoint1][pos1], solution.cycleIndices[cycleOfPoint2][pos2]);
-    //                 std::swap(solution.pointPositions[point1], solution.pointPositions[point2]);
-    //             }
-    //             return true;
-    //         }
-    //         if (delta < minDelta - epsilon)
-    //         {
-    //             bestPos1 = i;
-    //             bestPos2 = j;
-    //             minDelta = delta;
-    //             foundSwap = true;
-    //         }
-    //     }
-    // }
+    for (size_t i = 0; i < pointsInCycle1; ++i)
+    {
+        for (size_t j = 0; j < pointsInCycle2; ++j)
+        {
+            double delta = 0;
+            // Get all the neighbours of point 1
+            int next1;
+            int prev1;
+            point1 = solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1];
+            next1 = solution.cycleIndices[cycleOfPoint1][(i + 1) % cycleSizes[cycleOfPoint1]];
+            prev1 = solution.cycleIndices[cycleOfPoint1][(i - 1 + cycleSizes[cycleOfPoint1]) % cycleSizes[cycleOfPoint1]];
+            // Get all the neighbours of point 2
+            int next2;
+            int prev2;
+            point2 = solution.cycleIndices[cycleOfPoint2][j % pointsInCycle1];
+            next2 = solution.cycleIndices[cycleOfPoint2][(j + 1) % cycleSizes[cycleOfPoint2]];
+            prev2 = solution.cycleIndices[cycleOfPoint2][(j - 1 + cycleSizes[cycleOfPoint2]) % cycleSizes[cycleOfPoint2]];
+            // Calculate delta
+            delta -= distanceMatrix[point1][next1];
+            delta -= distanceMatrix[point1][prev1];
+            delta -= distanceMatrix[point2][next2];
+            delta -= distanceMatrix[point2][prev2];
+            delta += distanceMatrix[point1][next2];
+            delta += distanceMatrix[point1][prev2];
+            delta += distanceMatrix[point2][next1];
+            delta += distanceMatrix[point2][prev1];
+            // Only add moves that can improve the solution
+            if (strategy == "greedy" && delta < -epsilon)
+            {
+                int pos1 = i;
+                int pos2 = j;
+                // Ensure the points are in separate cycles
+                if (cycleOfPoint1 != cycleOfPoint2)
+                {
+                    std::swap(solution.cycleIndices[cycleOfPoint1][pos1], solution.cycleIndices[cycleOfPoint2][pos2]);
+                    std::swap(solution.pointPositions[point1], solution.pointPositions[point2]);
+                }
+                return true;
+            }
+            if (delta < minDelta - epsilon)
+            {
+                bestPos1 = i;
+                bestPos2 = j;
+                minDelta = delta;
+                foundSwap = true;
+            }
+        }
+    }
     for (size_t c = 0; c < 2; ++c)
     {
         // Loop over each pair of points in the solution
@@ -1128,33 +1128,9 @@ Solution localSearchEdges(Solution solution, const std::vector<std::vector<doubl
     }
 
     bool improvement = true;
-    int no = 0;
     while (improvement)
     {
-        no++;
-        // std::cout << "Move edges " << no;
-        //  std::cout << "No " << no << std::endl;
-
-        // Print cycles and distances to console
-        // if (no == 120)
-        // {
-        //     std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
-        //     for (int index : solution.cycleIndices[0])
-        //     {
-        //         std::cout << index << " ";
-        //     }
-        //     std::cout << std::endl;
-        //     std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
-        //     for (int index : solution.cycleIndices[1])
-        //     {
-        //         std::cout << index << " ";
-        //     }
-        //     std::cout << std::endl;
-        // }
-
         improvement = stepEdgeExchange(solution, distanceMatrix, strategy);
-        // if (no == 3)
-        //     break;
     }
     solution.updatePointPositions();
     return solution;
@@ -1620,6 +1596,93 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     plotSolution(bestGreedyGreedyEdgeSolution, points, distanceMatrix, "Greedy + Greedy Local Search + Edge Exchange");
 }
 
+void enqueueImprovingVertexMoves(
+    const std::vector<int> &pointsToUpdate,
+    const Solution &solution,
+    const std::vector<std::vector<double>> &distanceMatrix,
+    const std::vector<size_t> &cycleSizes,
+    std::priority_queue<Move> &pq,
+    double epsilon)
+{
+    for (int updatedPoint : pointsToUpdate)
+    {
+        auto [cycle, position] = solution.getPointPosition(updatedPoint);
+        int otherCycle = 1 - cycle;
+
+        for (int j = 0; j < cycleSizes[otherCycle]; j++)
+        {
+            double delta = 0.0;
+
+            int otherPoint = solution.cycleIndices[otherCycle][j];
+
+            int newNext1 = solution.cycleIndices[cycle][(position + 1) % cycleSizes[cycle]];
+            int newPrev1 = solution.cycleIndices[cycle][(position - 1 + cycleSizes[cycle]) % cycleSizes[cycle]];
+
+            int newNext2 = solution.cycleIndices[otherCycle][(j + 1) % cycleSizes[otherCycle]];
+            int newPrev2 = solution.cycleIndices[otherCycle][(j - 1 + cycleSizes[otherCycle]) % cycleSizes[otherCycle]];
+
+            delta -= distanceMatrix[updatedPoint][newNext1];
+            delta -= distanceMatrix[updatedPoint][newPrev1];
+            delta -= distanceMatrix[otherPoint][newNext2];
+            delta -= distanceMatrix[otherPoint][newPrev2];
+
+            delta += distanceMatrix[updatedPoint][newNext2];
+            delta += distanceMatrix[updatedPoint][newPrev2];
+            delta += distanceMatrix[otherPoint][newNext1];
+            delta += distanceMatrix[otherPoint][newPrev1];
+
+            if (delta < -epsilon)
+            {
+                pq.push(VertexMove(
+                    {newPrev1, updatedPoint, newNext1},
+                    {newPrev2, otherPoint, newNext2},
+                    delta));
+            }
+        }
+    }
+}
+
+void enqueueImprovingEdgeMoves(
+    const std::vector<Cut> &cutsToUpdate,
+    const Solution &solution,
+    const std::vector<std::vector<double>> &distanceMatrix,
+    const std::vector<size_t> &cycleSizes,
+    std::priority_queue<Move> &pq,
+    double epsilon)
+{
+    for (size_t i = 0; i < cycleSizes[0]; i++)
+    {
+        for (const Cut &cut : cutsToUpdate)
+        {
+            auto [cycleOfCut, positionOfCut] = solution.getPointPosition(cut.prev);
+
+            // Skip reversing the entire cycle
+            if (i == positionOfCut ||
+                (i + 1) % cycleSizes[cycleOfCut] == positionOfCut ||
+                (positionOfCut + 1) % cycleSizes[cycleOfCut] == i)
+            {
+                continue;
+            }
+
+            int point1 = solution.cycleIndices[cycleOfCut][i];
+            int next1 = solution.cycleIndices[cycleOfCut][(i + 1) % cycleSizes[cycleOfCut]];
+            int point2 = solution.cycleIndices[cycleOfCut][positionOfCut];
+            int next2 = solution.cycleIndices[cycleOfCut][(positionOfCut + 1) % cycleSizes[cycleOfCut]];
+
+            double delta = 0.0;
+            delta -= distanceMatrix[point1][next1];
+            delta -= distanceMatrix[point2][next2];
+            delta += distanceMatrix[next1][next2];
+            delta += distanceMatrix[point1][point2];
+
+            if (delta < -epsilon)
+            {
+                pq.push(EdgeMove({point1, next1}, {point2, next2}, delta));
+            }
+        }
+    }
+}
+
 Solution localSearchMemory(Solution solution, const std::vector<std::vector<double>> &distanceMatrix)
 {
     std::priority_queue<Move> pq;
@@ -1638,39 +1701,39 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
 
     // Add vertex swap between 2 cycles
     // For some reason it should always be a legal move
-    // for (size_t i = 0; i < pointsInCycle1; ++i)
-    // {
-    //     for (size_t j = 0; j < pointsInCycle2; ++j)
-    //     {
-    //         delta = 0;
-    //         // Get all the neighbours of point 1
-    //         int next1;
-    //         int prev1;
-    //         point1 = solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1];
-    //         next1 = solution.cycleIndices[cycleOfPoint1][(i + 1) % cycleSizes[cycleOfPoint1]];
-    //         prev1 = solution.cycleIndices[cycleOfPoint1][(i - 1 + cycleSizes[cycleOfPoint1]) % cycleSizes[cycleOfPoint1]];
-    //         // Get all the neighbours of point 2
-    //         int next2;
-    //         int prev2;
-    //         point2 = solution.cycleIndices[cycleOfPoint2][j % pointsInCycle2];
-    //         next2 = solution.cycleIndices[cycleOfPoint2][(j + 1) % cycleSizes[cycleOfPoint2]];
-    //         prev2 = solution.cycleIndices[cycleOfPoint2][(j - 1 + cycleSizes[cycleOfPoint2]) % cycleSizes[cycleOfPoint2]];
-    //         // Calculate delta
-    //         delta -= distanceMatrix[point1][next1];
-    //         delta -= distanceMatrix[point1][prev1];
-    //         delta -= distanceMatrix[point2][next2];
-    //         delta -= distanceMatrix[point2][prev2];
-    //         delta += distanceMatrix[point1][next2];
-    //         delta += distanceMatrix[point1][prev2];
-    //         delta += distanceMatrix[point2][next1];
-    //         delta += distanceMatrix[point2][prev1];
-    //         // Only add moves that can improve the solution
-    //         if (delta < -epsilon)
-    //         {
-    //             pq.push(VertexMove({prev1, point1, next1}, {prev2, point2, next2}, delta));
-    //         }
-    //     }
-    // }
+    for (size_t i = 0; i < pointsInCycle1; ++i)
+    {
+        for (size_t j = 0; j < pointsInCycle2; ++j)
+        {
+            delta = 0;
+            // Get all the neighbours of point 1
+            int next1;
+            int prev1;
+            point1 = solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1];
+            next1 = solution.cycleIndices[cycleOfPoint1][(i + 1) % cycleSizes[cycleOfPoint1]];
+            prev1 = solution.cycleIndices[cycleOfPoint1][(i - 1 + cycleSizes[cycleOfPoint1]) % cycleSizes[cycleOfPoint1]];
+            // Get all the neighbours of point 2
+            int next2;
+            int prev2;
+            point2 = solution.cycleIndices[cycleOfPoint2][j % pointsInCycle2];
+            next2 = solution.cycleIndices[cycleOfPoint2][(j + 1) % cycleSizes[cycleOfPoint2]];
+            prev2 = solution.cycleIndices[cycleOfPoint2][(j - 1 + cycleSizes[cycleOfPoint2]) % cycleSizes[cycleOfPoint2]];
+            // Calculate delta
+            delta -= distanceMatrix[point1][next1];
+            delta -= distanceMatrix[point1][prev1];
+            delta -= distanceMatrix[point2][next2];
+            delta -= distanceMatrix[point2][prev2];
+            delta += distanceMatrix[point1][next2];
+            delta += distanceMatrix[point1][prev2];
+            delta += distanceMatrix[point2][next1];
+            delta += distanceMatrix[point2][prev1];
+            // Only add moves that can improve the solution
+            if (delta < -epsilon)
+            {
+                pq.push(VertexMove({prev1, point1, next1}, {prev2, point2, next2}, delta));
+            }
+        }
+    }
     // Add edge exchange
     for (size_t c = 0; c < 2; ++c)
     {
@@ -1707,16 +1770,9 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
             }
         }
     }
-    // std::cout << pq.size() << std::endl;
-    int prevsize = pq.size() + 1;
     int no = 0;
     while (!pq.empty())
     {
-        // if (prevsize < pq.size())
-        // {
-        //     std::cout << pq.size() << std::endl;
-        // }
-        prevsize = pq.size();
         Move best = pq.top();
         pq.pop();
 
@@ -1753,35 +1809,13 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                     // And new potential moves
                     // That is both swapped points and their neighbours
                     std::vector<int> pointsToUpdate = {point1, prev1, next1, point2, prev2, next2};
-                    for (int i = 0; i < pointsToUpdate.size(); i++)
-                    {
-                        auto [cycle, position] = solution.getPointPosition(pointsToUpdate[i]);
-                        int otherCycle = 1 - cycle;
-                        int updatedPoint = pointsToUpdate[i];
-                        for (int j = 0; j < cycleSizes[otherCycle]; j++)
-                        {
-                            delta = 0.0;
-                            int otherPoint = solution.cycleIndices[otherCycle][j];
-                            int newNext1 = solution.cycleIndices[cycle][(position + 1) % cycleSizes[cycle]];
-                            int newPrev1 = solution.cycleIndices[cycle][(position - 1 + cycleSizes[cycle]) % cycleSizes[cycle]];
-                            int newNext2 = solution.cycleIndices[otherCycle][(j + 1) % cycleSizes[otherCycle]];
-                            int newPrev2 = solution.cycleIndices[otherCycle][(j - 1 + cycleSizes[otherCycle]) % cycleSizes[otherCycle]];
-                            // Calculate delta
-                            delta -= distanceMatrix[updatedPoint][newNext1];
-                            delta -= distanceMatrix[updatedPoint][newPrev1];
-                            delta -= distanceMatrix[otherPoint][newNext2];
-                            delta -= distanceMatrix[otherPoint][newPrev2];
-                            delta += distanceMatrix[updatedPoint][newNext2];
-                            delta += distanceMatrix[updatedPoint][newPrev2];
-                            delta += distanceMatrix[otherPoint][newNext1];
-                            delta += distanceMatrix[otherPoint][newPrev1];
-                            // Only add moves that can improve the solution
-                            if (delta < -epsilon)
-                            {
-                                pq.push(VertexMove({newPrev1, updatedPoint, newNext1}, {newPrev2, otherPoint, newNext2}, delta));
-                            }
-                        }
-                    }
+                    Cut cut1 = {prev1, point1};
+                    Cut cut2 = {point1, next1};
+                    Cut cut3 = {prev2, point2};
+                    Cut cut4 = {point2, next2};
+                    std::vector<Cut> cutsToUpdate = {cut1, cut2, cut3, cut4};
+                    enqueueImprovingEdgeMoves(cutsToUpdate, solution, distanceMatrix, cycleSizes, pq, epsilon);
+                    enqueueImprovingVertexMoves(pointsToUpdate, solution, distanceMatrix, cycleSizes, pq, epsilon);
                 }
             }
         }
@@ -1836,46 +1870,11 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
             if ((cut1.isSameDirectionAs(best.cut1) && cut2.isSameDirectionAs(best.cut2)) ||
                 (cut1.isReversedOf(best.cut1) && cut2.isReversedOf(best.cut2)))
             {
+                no++;
                 std::reverse(solution.cycleIndices[c].begin() + innerStart, solution.cycleIndices[c].begin() + innerEnd + 1);
                 solution.updatePointPositions();
-                Cut afterExchange1 = {best.cut1.prev, best.cut2.prev};
-                Cut afterExchange2 = {best.cut1.next, best.cut2.next};
-                std::vector<Cut> cutsToUpdate = {afterExchange1, afterExchange2};
-                no++;
-                // if (no < 10)
-                // {
-                //     std::cout << "Move edges " << no << ": (" << best.cut1.prev << " " << best.cut1.next << ") and (" << best.cut2.prev << " " << best.cut2.next << ")" << " score " << best.delta << std::endl;
-                //     //  std::cout << "New cuts: (" << best.cut1.prev << " " << best.cut2.prev << ") and (" << best.cut1.next << " " << best.cut2.next << ")" << std::endl;
-                // }
-                // if (no == 120 || no == 121 || no == 124 || no == 108)
-                // if (no == 106 || no == 105)
-                // {
-                //     // Print cycles and distances to console
-                //     std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
-                //     for (int index : solution.cycleIndices[0])
-                //     {
-                //         std::cout << index << " ";
-                //     }
-                //     std::cout << std::endl;
-                //     std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
-                //     for (int index : solution.cycleIndices[1])
-                //     {
-                //         std::cout << index << " ";
-                //     }
-                //     std::cout << std::endl;
-                // }
                 // Add new legal moves
                 int outerIterator = (innerEnd + 1) % cycleSizes[c];
-                // if (no == 106)
-                // {
-                //     std::cout << pos1 << " " << pos2 << std::endl;
-                //     std::cout << "Boundaries outer " << outerIterator << " " << innerStart << std::endl;
-                //     std::cout << "Boundaries inner " << (innerStart + 1) % cycleSizes[c] << " " << innerEnd << std::endl;
-                //     std::cout << "First cut outer " << solution.cycleIndices[c][outerIterator] << " " << solution.cycleIndices[c][outerIterator + 1] << std::endl;
-                //     std::cout << "First cut inner " << solution.cycleIndices[c][innerStart] << " " << solution.cycleIndices[c][innerStart + 1] << std::endl;
-                //     std::cout << "Last cut outer " << solution.cycleIndices[c][innerStart - 2] << " " << solution.cycleIndices[c][innerStart - 1] << std::endl;
-                //     std::cout << "Last cut inner " << solution.cycleIndices[c][innerEnd - 1] << " " << solution.cycleIndices[c][innerEnd] << std::endl;
-                // }
                 while (outerIterator != innerStart)
                 {
                     int innerIterator = innerStart % cycleSizes[c]; // skip the first cut (it has to update whole array)
@@ -1900,38 +1899,8 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                         delta -= distanceMatrix[point2][next2];
                         delta += distanceMatrix[next1][next2];
                         delta += distanceMatrix[point1][point2];
-
-                        // Cut c1 = Cut(175, 156);
-                        // Cut c2 = Cut(34, 130);
-
-                        // Cut c1 = Cut(56, 132);
-                        // Cut c2 = Cut(195, 3);
-
-                        // Cut c3 = Cut(point1, next1);
-                        // Cut c4 = Cut(point2, next2);
-
-                        // EdgeMove e = EdgeMove(c1, c2, 0);
-                        // EdgeMove e2 = EdgeMove(c3, c4, delta);
-                        // // if (no == 121)
-                        // // {
-                        // if (c1 == c3 || c1 == c4)
-                        // {
-                        //     if (c2 == c4 || c2 == c3)
-                        //     {
-                        //         std::cout << "Matched before " << delta << " " << point1 << " " << next1 << " " << point2 << " " << next2 << std::endl;
-                        //         std::cout << distanceMatrix[point1][next1] << " between " << point1 << " " << next1 << std::endl;
-                        //         std::cout << distanceMatrix[point2][next2] << " between " << point2 << " " << next2 << std::endl;
-                        //         std::cout << distanceMatrix[next1][next2] << " between " << next1 << " " << next2 << std::endl;
-                        //         std::cout << distanceMatrix[point1][point2] << " between " << point1 << " " << point2 << std::endl;
-                        //     }
-                        // }
-                        // }
                         if (delta < -epsilon)
                         {
-                            if (no < 10)
-                            {
-                                // std::cout << "New cut added: (" << newCut.prev << " " << newCut.next << ") and (" << cutsToUpdate[j].prev << " " << cutsToUpdate[j].next << ")" << " score " << delta << std::endl;
-                            }
                             pq.push(EdgeMove({point1, next1}, {point2, next2}, delta));
                         }
 
@@ -1941,69 +1910,11 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                     outerIterator++;
                     outerIterator = outerIterator % cycleSizes[c];
                 }
-                // Update cuts
-                for (int i = 0; i < cycleSizes[c]; i++)
-                {
-                    for (int j = 0; j < cutsToUpdate.size(); j++)
-                    {
-                        auto [cycleOfCut, positionOfCut] = solution.getPointPosition(cutsToUpdate[j].prev);
-                        int next1, next2;
-                        // if (no == 106 && i == 1)
-                        // {
-                        //     std::cout << "Cut " << cutsToUpdate[j].prev << " " << cutsToUpdate[j].next << " " << positionOfCut << std::endl;
-                        // }
-                        // Skip reversing the entire cycle
-                        if (i == positionOfCut || (i + 1) % cycleSizes[c] == positionOfCut || (positionOfCut + 1) % cycleSizes[c] == i)
-                        {
-                            continue;
-                        }
-                        double delta = 0.0;
-                        point1 = solution.cycleIndices[c][i];
-                        next1 = solution.cycleIndices[c][(i + 1) % cycleSizes[c]];
-                        point2 = solution.cycleIndices[c][positionOfCut];
-                        next2 = solution.cycleIndices[c][(positionOfCut + 1) % cycleSizes[c]];
-
-                        delta -= distanceMatrix[point1][next1];
-                        delta -= distanceMatrix[point2][next2];
-                        delta += distanceMatrix[next1][next2];
-                        delta += distanceMatrix[point1][point2];
-
-                        // Cut c1 = Cut(34, 130);
-                        // Cut c2 = Cut(175, 156);
-
-                        // Cut c3 = Cut(point1, next1);
-                        // Cut c4 = Cut(point2, next2);
-
-                        // EdgeMove e = EdgeMove(c1, c2, 0);
-                        // EdgeMove e2 = EdgeMove(c3, c4, delta);
-
-                        // if (c1 == c3 || c1 == c4)
-                        // {
-                        //     if (c2 == c4 || c2 == c3)
-                        //     {
-                        //         std::cout << "Matched after " << delta << " " << point1 << " " << next1 << " " << point2 << " " << next2 << std::endl;
-                        //         std::cout << distanceMatrix[point1][next1] << std::endl;
-                        //         std::cout << distanceMatrix[point2][next2] << std::endl;
-                        //         std::cout << distanceMatrix[next1][next2] << std::endl;
-                        //         std::cout << distanceMatrix[point1][point2] << std::endl;
-                        //     }
-                        // }
-
-                        if (delta < -epsilon)
-                        {
-                            if (no < 10)
-                            {
-                                // std::cout << "New cut added: (" << newCut.prev << " " << newCut.next << ") and (" << cutsToUpdate[j].prev << " " << cutsToUpdate[j].next << ")" << " score " << delta << std::endl;
-                            }
-                            pq.push(EdgeMove({point1, next1}, {point2, next2}, delta));
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // if (no < 10)
-                //     std::cout << "ILLEGAL " << best.point1 << " " << best.point2 << std::endl;
+                Cut afterExchange1 = {best.cut1.prev, best.cut2.prev};
+                Cut afterExchange2 = {best.cut1.next, best.cut2.next};
+                std::vector<Cut> cutsToUpdate = {afterExchange1, afterExchange2};
+                enqueueImprovingEdgeMoves(cutsToUpdate, solution, distanceMatrix, cycleSizes, pq, epsilon);
+                enqueueImprovingVertexMoves(pointsToUpdate, solution, distanceMatrix, cycleSizes, pq, epsilon);
             }
         }
     }
@@ -2021,7 +1932,7 @@ Solution localSearchCandidates(Solution solution, const std::vector<std::vector<
 
 void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    int iterations = 1000;
+    int iterations = 100;
 
     // 0. Regret Cycle Weighted Heuristic
     double minHeuristicScore = std::numeric_limits<double>::max();
@@ -2061,12 +1972,6 @@ void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // 1. Random + Priority Queue + Memory + Steepest Descent + Edge Exchange
         Solution solution1 = localSearchMemory(initialRandom, distanceMatrix);
-
-        // plotSolution(solution1, points, distanceMatrix, "Random + Memory + Steepest Descent + Edge Exchange");
-        //  solution1 = localSearchEdges(solution1, distanceMatrix, "steepest");
-        //  plotSolution(solution1, points, distanceMatrix, "After");
-        //  solution1 = localSearchVertex(solution1, distanceMatrix, "steepest");
-        //  plotSolution(solution1, points, distanceMatrix, "After2");
 
         solution1.calculateScore(distanceMatrix);
         double score1 = solution1.getScore();

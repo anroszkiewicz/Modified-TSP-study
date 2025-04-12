@@ -777,7 +777,7 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
     Solution solution;
     int n = distanceMatrix.size();
 
-    // int seed = 42; // dowolna liczba całkowita jako seed
+    // int seed = 41; // dowolna liczba całkowita jako seed
     // std::mt19937 rng(seed);
 
     // Generate a shuffled list of indices
@@ -1135,19 +1135,22 @@ Solution localSearchEdges(Solution solution, const std::vector<std::vector<doubl
         // std::cout << "Move edges " << no;
         //  std::cout << "No " << no << std::endl;
 
-        // // Print cycles and distances to console
-        // std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
-        // for (int index : solution.cycleIndices[0])
+        // Print cycles and distances to console
+        // if (no == 120)
         // {
-        //     std::cout << index << " ";
+        //     std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
+        //     for (int index : solution.cycleIndices[0])
+        //     {
+        //         std::cout << index << " ";
+        //     }
+        //     std::cout << std::endl;
+        //     std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
+        //     for (int index : solution.cycleIndices[1])
+        //     {
+        //         std::cout << index << " ";
+        //     }
+        //     std::cout << std::endl;
         // }
-        // std::cout << std::endl;
-        // std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
-        // for (int index : solution.cycleIndices[1])
-        // {
-        //     std::cout << index << " ";
-        // }
-        // std::cout << std::endl;
 
         improvement = stepEdgeExchange(solution, distanceMatrix, strategy);
         // if (no == 3)
@@ -1840,11 +1843,12 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                 std::vector<Cut> cutsToUpdate = {afterExchange1, afterExchange2};
                 no++;
                 // if (no < 10)
-                {
-                    // std::cout << "Move edges " << no << ": (" << best.cut1.prev << " " << best.cut1.next << ") and (" << best.cut2.prev << " " << best.cut2.next << ")" << " score " << best.delta << std::endl;
-                    //  std::cout << "New cuts: (" << best.cut1.prev << " " << best.cut2.prev << ") and (" << best.cut1.next << " " << best.cut2.next << ")" << std::endl;
-                }
-                // if (no == 58 || no == 59)
+                // {
+                //     std::cout << "Move edges " << no << ": (" << best.cut1.prev << " " << best.cut1.next << ") and (" << best.cut2.prev << " " << best.cut2.next << ")" << " score " << best.delta << std::endl;
+                //     //  std::cout << "New cuts: (" << best.cut1.prev << " " << best.cut2.prev << ") and (" << best.cut1.next << " " << best.cut2.next << ")" << std::endl;
+                // }
+                // if (no == 120 || no == 121 || no == 124 || no == 108)
+                // if (no == 106 || no == 105)
                 // {
                 //     // Print cycles and distances to console
                 //     std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
@@ -1861,16 +1865,21 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                 //     std::cout << std::endl;
                 // }
                 // Add new legal moves
-                int outerIterator = (pos2 + 1) % cycleSizes[c];
-                // if (no == 58)
+                int outerIterator = (innerEnd + 1) % cycleSizes[c];
+                // if (no == 106)
                 // {
-                //     std::cout << "Boundaries outer " << outerIterator << " " << pos1 << std::endl;
-                //     std::cout << "Boundaries inner " << (pos1 + 1) % cycleSizes[c] << " " << pos2 << std::endl;
+                //     std::cout << pos1 << " " << pos2 << std::endl;
+                //     std::cout << "Boundaries outer " << outerIterator << " " << innerStart << std::endl;
+                //     std::cout << "Boundaries inner " << (innerStart + 1) % cycleSizes[c] << " " << innerEnd << std::endl;
+                //     std::cout << "First cut outer " << solution.cycleIndices[c][outerIterator] << " " << solution.cycleIndices[c][outerIterator + 1] << std::endl;
+                //     std::cout << "First cut inner " << solution.cycleIndices[c][innerStart] << " " << solution.cycleIndices[c][innerStart + 1] << std::endl;
+                //     std::cout << "Last cut outer " << solution.cycleIndices[c][innerStart - 2] << " " << solution.cycleIndices[c][innerStart - 1] << std::endl;
+                //     std::cout << "Last cut inner " << solution.cycleIndices[c][innerEnd - 1] << " " << solution.cycleIndices[c][innerEnd] << std::endl;
                 // }
-                while (outerIterator != pos1)
+                while (outerIterator != innerStart)
                 {
-                    int innerIterator = (pos1 + 1) % cycleSizes[c]; // skip the first cut (it has to update whole array)
-                    while (innerIterator != pos2)                   // skip the last cut for the same reason
+                    int innerIterator = innerStart % cycleSizes[c]; // skip the first cut (it has to update whole array)
+                    while (innerIterator != innerEnd)               // skip the last cut for the same reason
                     {
                         // Skip reversing the entire cycle
                         if (outerIterator == innerIterator || (innerIterator + 1) % cycleSizes[c] == outerIterator || (outerIterator + 1) % cycleSizes[c] == innerIterator)
@@ -1892,25 +1901,30 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                         delta += distanceMatrix[next1][next2];
                         delta += distanceMatrix[point1][point2];
 
-                        // Cut c1 = Cut(44, 21);
-                        // Cut c2 = Cut(101, 170);
+                        // Cut c1 = Cut(175, 156);
+                        // Cut c2 = Cut(34, 130);
+
+                        // Cut c1 = Cut(56, 132);
+                        // Cut c2 = Cut(195, 3);
 
                         // Cut c3 = Cut(point1, next1);
                         // Cut c4 = Cut(point2, next2);
 
                         // EdgeMove e = EdgeMove(c1, c2, 0);
                         // EdgeMove e2 = EdgeMove(c3, c4, delta);
-
+                        // // if (no == 121)
+                        // // {
                         // if (c1 == c3 || c1 == c4)
                         // {
                         //     if (c2 == c4 || c2 == c3)
                         //     {
-                        //         std::cout << "Matched before" << delta << " " << point1 << " " << next1 << " " << point2 << " " << next2 << std::endl;
-                        //         std::cout << distanceMatrix[point1][next1] << std::endl;
-                        //         std::cout << distanceMatrix[point2][next2] << std::endl;
-                        //         std::cout << distanceMatrix[next1][next2] << std::endl;
-                        //         std::cout << distanceMatrix[point1][point2] << std::endl;
+                        //         std::cout << "Matched before " << delta << " " << point1 << " " << next1 << " " << point2 << " " << next2 << std::endl;
+                        //         std::cout << distanceMatrix[point1][next1] << " between " << point1 << " " << next1 << std::endl;
+                        //         std::cout << distanceMatrix[point2][next2] << " between " << point2 << " " << next2 << std::endl;
+                        //         std::cout << distanceMatrix[next1][next2] << " between " << next1 << " " << next2 << std::endl;
+                        //         std::cout << distanceMatrix[point1][point2] << " between " << point1 << " " << point2 << std::endl;
                         //     }
+                        // }
                         // }
                         if (delta < -epsilon)
                         {
@@ -1934,7 +1948,7 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                     {
                         auto [cycleOfCut, positionOfCut] = solution.getPointPosition(cutsToUpdate[j].prev);
                         int next1, next2;
-                        // if (no == 1)
+                        // if (no == 106 && i == 1)
                         // {
                         //     std::cout << "Cut " << cutsToUpdate[j].prev << " " << cutsToUpdate[j].next << " " << positionOfCut << std::endl;
                         // }
@@ -1954,8 +1968,8 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                         delta += distanceMatrix[next1][next2];
                         delta += distanceMatrix[point1][point2];
 
-                        // Cut c1 = Cut(44, 21);
-                        // Cut c2 = Cut(101, 170);
+                        // Cut c1 = Cut(34, 130);
+                        // Cut c2 = Cut(175, 156);
 
                         // Cut c3 = Cut(point1, next1);
                         // Cut c4 = Cut(point2, next2);
@@ -1967,7 +1981,7 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                         // {
                         //     if (c2 == c4 || c2 == c3)
                         //     {
-                        //         std::cout << "Matched here " << delta << " " << point1 << " " << next1 << " " << point2 << " " << next2 << std::endl;
+                        //         std::cout << "Matched after " << delta << " " << point1 << " " << next1 << " " << point2 << " " << next2 << std::endl;
                         //         std::cout << distanceMatrix[point1][next1] << std::endl;
                         //         std::cout << distanceMatrix[point2][next2] << std::endl;
                         //         std::cout << distanceMatrix[next1][next2] << std::endl;
@@ -2007,7 +2021,7 @@ Solution localSearchCandidates(Solution solution, const std::vector<std::vector<
 
 void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    int iterations = 100;
+    int iterations = 1000;
 
     // 0. Regret Cycle Weighted Heuristic
     double minHeuristicScore = std::numeric_limits<double>::max();
@@ -2070,6 +2084,8 @@ void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         totalRandomSteepestCandidatesScore += score2;
         if (score2 == minRandomSteepestCandidatesScore)
             bestRandomSteepestCandidatesSolution = solution2;
+        if (abs(score2 - score1) > 1e-3)
+            std::cout << score2 << " " << score1 << std::endl;
     }
 
     // Print results

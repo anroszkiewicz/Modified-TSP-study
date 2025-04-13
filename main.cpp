@@ -1974,9 +1974,10 @@ Solution localSearchCandidates(Solution solution, const std::vector<std::vector<
         double minDelta = 0.0;
         int whichPoint;
         int insertedNeighbour;
+        int whoStays;
         int whichSide;
-        int removedPoint;
-        int placedAfter;
+        int whichSideOther;
+        int whichLength;
         bool sameCycle = true;
         double oldCost, newCost;
         int prev, next;
@@ -2030,69 +2031,48 @@ Solution localSearchCandidates(Solution solution, const std::vector<std::vector<
                     }
                     else
                     {
-                        // Calculate removal gain
-                        prev = solution.cycleIndices[neighbourCycle][(neighbourPosition - 1 + cycleSizes[neighbourCycle]) % cycleSizes[neighbourCycle]];
-                        next = solution.cycleIndices[neighbourCycle][(neighbourPosition + 1) % cycleSizes[neighbourCycle]];
-                        oldCost = distanceMatrix[prev][neighbour] + distanceMatrix[neighbour][next];
-                        newCost = distanceMatrix[prev][next];
-                        double neighbourRemovalDelta = newCost - oldCost;
-
                         // Check both +1 and -1 position
                         std::vector<int> sides = {-1, 1};
                         for (const int side : sides)
                         {
-                            int insertingPosition = (i + side + cycleSizes[c]) % cycleSizes[c];
-                            int other = solution.cycleIndices[c][insertingPosition];
-                            newCost = distanceMatrix[other][neighbour] + distanceMatrix[neighbour][currentPoint];
-                            oldCost = distanceMatrix[currentPoint][other];
-                            double insertNeighbourDelta = newCost - oldCost;
-                            // Calculate the cost of removing any other point
-                            for (int k = 0; k < cycleSizes[c]; k++)
+                            // Check both +1 and -1 position for the other cycle
+                            std::vector<int> sidesOther = {-1, 1};
+                            for (const int sideOther : sidesOther)
                             {
-                                int pointToRemove = solution.cycleIndices[c][k];
-                                if (pointToRemove == currentPoint)
+                                // Check all possible lengths
+                                for (int l = 1; l < cycleSizes[neighbourCycle] - 1; l++)
                                 {
-                                    continue; // It makes no sense to remove the point whose nearest neighbor we are trying to insert
-                                }
-                                prev = solution.cycleIndices[c][(k - 1 + cycleSizes[c]) % cycleSizes[c]];
-                                if (prev == currentPoint && side == 1)
-                                {
-                                    prev = neighbour;
-                                }
-                                next = solution.cycleIndices[c][(k + 1) % cycleSizes[c]];
-                                if (next == currentPoint && side == -1)
-                                {
-                                    next = neighbour;
-                                }
-                                oldCost = distanceMatrix[prev][pointToRemove] + distanceMatrix[pointToRemove][next];
-                                newCost = distanceMatrix[prev][next];
-                                double newRemovalDelta = newCost - oldCost;
-                                // Calculate where we can insert this removed point
-                                for (int m = 0; m < cycleSizes[neighbourCycle]; m++)
-                                {
-                                    prev = solution.cycleIndices[neighbourCycle][m];
-                                    if (prev == neighbour)
-                                    {
-                                        prev = solution.cycleIndices[neighbourCycle][(m - 1 + cycleSizes[neighbourCycle]) % cycleSizes[neighbourCycle]];
-                                    }
-                                    next = solution.cycleIndices[neighbourCycle][(m + 1) % cycleSizes[neighbourCycle]];
-                                    if (next == neighbour)
-                                    {
-                                        next = solution.cycleIndices[neighbourCycle][(m + 2) % cycleSizes[neighbourCycle]];
-                                    }
-                                    newCost = distanceMatrix[prev][pointToRemove] + distanceMatrix[pointToRemove][next];
-                                    oldCost = distanceMatrix[prev][next];
-                                    double insertionDelta = newCost - oldCost;
-                                    delta = neighbourRemovalDelta + insertNeighbourDelta + newRemovalDelta + insertionDelta;
+                                    int indexRemoved1 = (i + side * l + cycleSizes[c]) % cycleSizes[c];
+                                    int pointRemoved1 = solution.cycleIndices[c][indexRemoved1];
+                                    int indexRemoved2 = (i + side + cycleSizes[c]) % cycleSizes[c];
+                                    int pointRemoved2 = solution.cycleIndices[c][indexRemoved2];
+                                    int indexToJoin = (i + side * (l + 1) + cycleSizes[c]) % cycleSizes[c];
+                                    int pointToJoin = solution.cycleIndices[c][indexToJoin];
+
+                                    int indexStayInCycleNeighbour1 = (neighbourPosition - sideOther + cycleSizes[neighbourCycle]) % cycleSizes[neighbourCycle];
+                                    int pointStayInCycleNeighbour1 = solution.cycleIndices[neighbourCycle][indexStayInCycleNeighbour1];
+                                    int indexEndSegmentNeighbour = (indexStayInCycleNeighbour1 + sideOther * l + cycleSizes[neighbourCycle]) % cycleSizes[neighbourCycle];
+                                    int pointEndSegmentNeighbour = solution.cycleIndices[neighbourCycle][indexEndSegmentNeighbour];
+                                    int indexStayInCycleNeighbour2 = (indexStayInCycleNeighbour1 + sideOther * (l + 1) + cycleSizes[neighbourCycle]) % cycleSizes[neighbourCycle];
+                                    int pointStayInCycleNeighbour2 = solution.cycleIndices[neighbourCycle][indexStayInCycleNeighbour2];
+
+                                    oldCost = distanceMatrix[currentPoint][pointRemoved2] + distanceMatrix[pointToJoin][pointRemoved1];
+                                    newCost = distanceMatrix[currentPoint][neighbour] + distanceMatrix[pointToJoin][pointEndSegmentNeighbour];
+                                    double currentCycleDelta = newCost - oldCost;
+                                    oldCost = distanceMatrix[pointStayInCycleNeighbour1][neighbour] + distanceMatrix[pointStayInCycleNeighbour2][pointEndSegmentNeighbour];
+                                    newCost = distanceMatrix[pointStayInCycleNeighbour1][pointRemoved2] + distanceMatrix[pointStayInCycleNeighbour2][pointRemoved1];
+                                    double neighbourCycleDelta = newCost - oldCost;
+                                    delta = currentCycleDelta + neighbourCycleDelta;
                                     if (delta < minDelta - epsilon)
                                     {
                                         minDelta = delta;
                                         improvement = true;
                                         whichPoint = currentPoint;
                                         insertedNeighbour = neighbour;
+                                        whoStays = pointStayInCycleNeighbour1;
                                         whichSide = side;
-                                        removedPoint = pointToRemove;
-                                        placedAfter = prev;
+                                        whichSideOther = sideOther;
+                                        whichLength = l;
                                         sameCycle = false;
                                     }
                                 }
@@ -2134,37 +2114,17 @@ Solution localSearchCandidates(Solution solution, const std::vector<std::vector<
             }
             else
             {
-                // 0. Remove insertedNeighbour from its current cycle
-                auto [insertedCycle, insertedPos] = solution.getPointPosition(insertedNeighbour);
-                solution.cycleIndices[insertedCycle].erase(solution.cycleIndices[insertedCycle].begin() + insertedPos);
+                auto [whichCycle, stayPosition] = solution.getPointPosition(whichPoint);
+                auto [otherCycle, otherStayPosition] = solution.getPointPosition(whoStays);
 
-                // 1. Find position of whichPoint
-                auto [targetCycle, targetPos] = solution.getPointPosition(whichPoint);
-
-                // 2. Insert insertedNeighbour before or after whichPoint depending on whichSide
-                if (whichSide == -1)
+                // Replace segments of length whichLength
+                for (int l = 1; l <= whichLength; l++)
                 {
-                    solution.cycleIndices[targetCycle].insert(solution.cycleIndices[targetCycle].begin() + targetPos, insertedNeighbour);
+                    int index1 = (stayPosition + (whichSide * l) + cycleSizes[whichCycle]) % cycleSizes[whichCycle];
+                    int index2 = (otherStayPosition + (whichSideOther * l) + cycleSizes[otherCycle]) % cycleSizes[otherCycle];
+                    std::swap(solution.pointPositions[solution.cycleIndices[whichCycle][index1]], solution.pointPositions[solution.cycleIndices[otherCycle][index2]]);
+                    std::swap(solution.cycleIndices[whichCycle][index1], solution.cycleIndices[otherCycle][index2]);
                 }
-                else // whichSide == 1
-                {
-                    solution.cycleIndices[targetCycle].insert(solution.cycleIndices[targetCycle].begin() + targetPos + 1, insertedNeighbour);
-                }
-
-                solution.updatePointPositions();
-
-                // 4. Remove removedPoint from its current cycle
-                auto [removedCycle, removedPos] = solution.getPointPosition(removedPoint);
-                solution.cycleIndices[removedCycle].erase(solution.cycleIndices[removedCycle].begin() + removedPos);
-
-                // 5. Insert removedPoint after placedAfter
-                auto [placedAfterCycle, placedAfterPos] = solution.getPointPosition(placedAfter);
-                solution.cycleIndices[placedAfterCycle].insert(solution.cycleIndices[placedAfterCycle].begin() + placedAfterPos + 1, removedPoint);
-
-                solution.calculateScore(distanceMatrix);
-
-                // 6. Update point positions again
-                solution.updatePointPositions();
             }
         }
     }
@@ -2174,7 +2134,7 @@ Solution localSearchCandidates(Solution solution, const std::vector<std::vector<
 
 void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    int iterations = 1;
+    int iterations = 100;
 
     // 0. Regret Cycle Weighted Heuristic
     double minHeuristicScore = std::numeric_limits<double>::max();

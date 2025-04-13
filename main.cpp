@@ -19,6 +19,8 @@ struct Point
     double x, y;
 };
 
+std::vector<Point> points;
+
 struct Solution
 {
     std::vector<int> cycleIndices[2];
@@ -350,7 +352,7 @@ Solution greedyNearestNeighbour(const std::vector<std::vector<double>> &distance
         int nextPoint = -1;
         int addToCycle = -1;
 
-        // Find the nearest unvisited neighbor using the distanceMatrix
+        // Find the nearest unvisited neighbour using the distanceMatrix
         for (int j = 0; j < n; ++j)
         {
             if (!visited[j] && distanceMatrix[current1][j] < minDistance && solution.cycleIndices[0].size() < maxCycleSize)
@@ -597,22 +599,22 @@ void plotSolution(Solution &solution, const std::vector<Point> &points, const st
     double cycle2Distance = solution.getCycle2Score(distanceMatrix);
     double totalDistance = cycle1Distance + cycle2Distance;
 
-    // Print cycles and distances to console
-    std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
-    for (int index : solution.cycleIndices[0])
-    {
-        std::cout << index << " ";
-    }
-    std::cout << "\nTotal Distance: " << cycle1Distance << std::endl;
+    // // Print cycles and distances to console
+    // std::cout << "Cycle 1 (size " << solution.cycleIndices[0].size() << "): ";
+    // for (int index : solution.cycleIndices[0])
+    // {
+    //     std::cout << index << " ";
+    // }
+    // std::cout << "\nTotal Distance: " << cycle1Distance << std::endl;
 
-    std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
-    for (int index : solution.cycleIndices[1])
-    {
-        std::cout << index << " ";
-    }
-    std::cout << "\nTotal Distance: " << cycle2Distance << std::endl;
+    // std::cout << "Cycle 2 (size " << solution.cycleIndices[1].size() << "): ";
+    // for (int index : solution.cycleIndices[1])
+    // {
+    //     std::cout << index << " ";
+    // }
+    // std::cout << "\nTotal Distance: " << cycle2Distance << std::endl;
 
-    std::cout << "Total Distance for both cycles: " << totalDistance << std::endl;
+    // std::cout << "Total Distance for both cycles: " << totalDistance << std::endl;
 
     // Prepare data for plotting
     std::vector<double> x_coords, y_coords;
@@ -1240,7 +1242,7 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         1. **Starting Solution**
            - `Random` (Completely randomized initial solution)
-           - `Greedy` (Constructed using a heuristic like Nearest Neighbor or Greedy Cycle)
+           - `Greedy` (Constructed using a heuristic like Nearest neighbour or Greedy Cycle)
 
         2. **Local Search Strategy**
            - `Steepest Descent` (Evaluates all possible improvements and picks the best one)
@@ -1801,7 +1803,7 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                 {
                     no++;
                     // std::cout << "Move vertices " << no << ": " << best.neighbourhood1.mid << " " << best.neighbourhood2.mid << " score " << best.delta << "   ---------   ";
-                    // std::cout << "Neighbors1 " << best.neighbourhood1.prev << " " << best.neighbourhood1.next << " Neighbors2 " << best.neighbourhood1.prev << " " << best.neighbourhood2.next << std::endl;
+                    // std::cout << "neighbours1 " << best.neighbourhood1.prev << " " << best.neighbourhood1.next << " neighbours2 " << best.neighbourhood1.prev << " " << best.neighbourhood2.next << std::endl;
 
                     //  Swap the points between the two cycles
                     std::swap(solution.cycleIndices[cycle1][pos1], solution.cycleIndices[cycle2][pos2]);
@@ -1922,17 +1924,257 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
     return solution;
 }
 
+std::vector<std::vector<int>> computeNearestneighbours(
+    const std::vector<std::vector<double>> &distanceMatrix,
+    int n = 10)
+{
+    size_t numberOfPoints = distanceMatrix.size();
+    std::vector<std::vector<int>> nearestneighbours(numberOfPoints);
+
+    for (size_t i = 0; i < numberOfPoints; ++i)
+    {
+        std::vector<std::pair<double, int>> distances;
+
+        for (size_t j = 0; j < numberOfPoints; ++j)
+        {
+            if (i == j)
+                continue;
+            distances.emplace_back(distanceMatrix[i][j], j);
+        }
+
+        std::partial_sort(
+            distances.begin(),
+            distances.begin() + std::min(n, (int)distances.size()),
+            distances.end());
+
+        for (int k = 0; k < std::min(n, (int)distances.size()); ++k)
+        {
+            nearestneighbours[i].push_back(distances[k].second);
+        }
+    }
+
+    return nearestneighbours;
+}
+
 Solution localSearchCandidates(Solution solution, const std::vector<std::vector<double>> &distanceMatrix)
 {
-    std::priority_queue<Move> pq;
-    return localSearchEdges(solution, distanceMatrix, "steepest");
-    // Move best = pq.top(); // będzie miał najmniejsze delta
+    const double epsilon = 1e-6; // Avoid numerical errors
+    size_t numberOfPoints = distanceMatrix.size();
+    size_t pointsInCycle1 = solution.cycleIndices[0].size(); // Size of first cycle
+    size_t pointsInCycle2 = solution.cycleIndices[1].size(); // Size of second cycle
+    std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
+    int numberOfNearestPoints = 10;
+
+    auto nearestneighbours = computeNearestneighbours(distanceMatrix, numberOfNearestPoints);
+
+    bool improvement = true;
+    while (improvement)
+    {
+        improvement = false;
+        double minDelta = 0.0;
+        int whichPoint;
+        int insertedNeighbour;
+        int whichSide;
+        int removedPoint;
+        int placedAfter;
+        bool sameCycle = true;
+        double oldCost, newCost;
+        int prev, next;
+
+        // For each cycle
+        for (int c = 0; c < 2; c++)
+        {
+            // Check each point in cycle
+            for (int i = 0; i < cycleSizes[c]; i++)
+            {
+                int currentPoint = solution.cycleIndices[c][i];
+
+                // And its nearest neighbours
+                for (int j = 0; j < numberOfNearestPoints; j++)
+                {
+                    int neighbour = nearestneighbours[currentPoint][j];
+                    auto [neighbourCycle, neighbourPosition] = solution.getPointPosition(neighbour);
+                    double delta = 0.0;
+
+                    if (neighbourCycle == c)
+                    {
+                        if ((i + 1) % cycleSizes[c] == neighbourPosition || (neighbourPosition + 1) % cycleSizes[c] == i)
+                        {
+                            continue; // Skip if the point is already there
+                        }
+                        // Check both +1 and -1 position
+                        std::vector<int> sides = {-1, 1};
+                        for (const int side : sides)
+                        {
+                            int insertingPosition = (i + side + cycleSizes[c]) % cycleSizes[c];
+                            int otherCurrentlyThere = solution.cycleIndices[c][insertingPosition];
+                            newCost = distanceMatrix[currentPoint][neighbour];
+                            oldCost = distanceMatrix[currentPoint][otherCurrentlyThere];
+                            double insertNeighbourDelta = newCost - oldCost;
+                            int indexConnectedToNeighbour = (neighbourPosition + side + cycleSizes[c]) % cycleSizes[c];
+                            int connectedToNeighbour = solution.cycleIndices[c][indexConnectedToNeighbour];
+                            newCost = distanceMatrix[otherCurrentlyThere][connectedToNeighbour];
+                            oldCost = distanceMatrix[neighbour][connectedToNeighbour];
+                            double secondEdgeDelta = newCost - oldCost;
+                            delta = insertNeighbourDelta + secondEdgeDelta;
+                            if (delta < minDelta - epsilon)
+                            {
+                                minDelta = delta;
+                                improvement = true;
+                                whichPoint = currentPoint;
+                                insertedNeighbour = neighbour;
+                                whichSide = side;
+                                sameCycle = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Calculate removal gain
+                        prev = solution.cycleIndices[neighbourCycle][(neighbourPosition - 1 + cycleSizes[neighbourCycle]) % cycleSizes[neighbourCycle]];
+                        next = solution.cycleIndices[neighbourCycle][(neighbourPosition + 1) % cycleSizes[neighbourCycle]];
+                        oldCost = distanceMatrix[prev][neighbour] + distanceMatrix[neighbour][next];
+                        newCost = distanceMatrix[prev][next];
+                        double neighbourRemovalDelta = newCost - oldCost;
+
+                        // Check both +1 and -1 position
+                        std::vector<int> sides = {-1, 1};
+                        for (const int side : sides)
+                        {
+                            int insertingPosition = (i + side + cycleSizes[c]) % cycleSizes[c];
+                            int other = solution.cycleIndices[c][insertingPosition];
+                            newCost = distanceMatrix[other][neighbour] + distanceMatrix[neighbour][currentPoint];
+                            oldCost = distanceMatrix[currentPoint][other];
+                            double insertNeighbourDelta = newCost - oldCost;
+                            // Calculate the cost of removing any other point
+                            for (int k = 0; k < cycleSizes[c]; k++)
+                            {
+                                int pointToRemove = solution.cycleIndices[c][k];
+                                if (pointToRemove == currentPoint)
+                                {
+                                    continue; // It makes no sense to remove the point whose nearest neighbor we are trying to insert
+                                }
+                                prev = solution.cycleIndices[c][(k - 1 + cycleSizes[c]) % cycleSizes[c]];
+                                if (prev == currentPoint && side == 1)
+                                {
+                                    prev = neighbour;
+                                }
+                                next = solution.cycleIndices[c][(k + 1) % cycleSizes[c]];
+                                if (next == currentPoint && side == -1)
+                                {
+                                    next = neighbour;
+                                }
+                                oldCost = distanceMatrix[prev][pointToRemove] + distanceMatrix[pointToRemove][next];
+                                newCost = distanceMatrix[prev][next];
+                                double newRemovalDelta = newCost - oldCost;
+                                // Calculate where we can insert this removed point
+                                for (int m = 0; m < cycleSizes[neighbourCycle]; m++)
+                                {
+                                    prev = solution.cycleIndices[neighbourCycle][m];
+                                    if (prev == neighbour)
+                                    {
+                                        prev = solution.cycleIndices[neighbourCycle][(m - 1 + cycleSizes[neighbourCycle]) % cycleSizes[neighbourCycle]];
+                                    }
+                                    next = solution.cycleIndices[neighbourCycle][(m + 1) % cycleSizes[neighbourCycle]];
+                                    if (next == neighbour)
+                                    {
+                                        next = solution.cycleIndices[neighbourCycle][(m + 2) % cycleSizes[neighbourCycle]];
+                                    }
+                                    newCost = distanceMatrix[prev][pointToRemove] + distanceMatrix[pointToRemove][next];
+                                    oldCost = distanceMatrix[prev][next];
+                                    double insertionDelta = newCost - oldCost;
+                                    delta = neighbourRemovalDelta + insertNeighbourDelta + newRemovalDelta + insertionDelta;
+                                    if (delta < minDelta - epsilon)
+                                    {
+                                        minDelta = delta;
+                                        improvement = true;
+                                        whichPoint = currentPoint;
+                                        insertedNeighbour = neighbour;
+                                        whichSide = side;
+                                        removedPoint = pointToRemove;
+                                        placedAfter = prev;
+                                        sameCycle = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (improvement)
+        {
+            if (sameCycle == true)
+            {
+                // It's basically the same as edge exchange (rotation)
+                auto [cycle1, smallerPos] = solution.getPointPosition(whichPoint);
+                auto [cycle2, greaterPos] = solution.getPointPosition(insertedNeighbour);
+                int c = cycle1; // Both cycles are the same
+                // Ensure position 1 is before position 2
+                if (smallerPos > greaterPos)
+                {
+                    std::swap(smallerPos, greaterPos);
+                }
+                int innerStart = smallerPos;
+                int innerEnd = greaterPos;
+                if (whichSide == 1)
+                {
+                    innerStart = smallerPos + 1;
+                    innerEnd = greaterPos;
+                }
+                else // -1
+                {
+                    innerStart = smallerPos;
+                    innerEnd = greaterPos - 1;
+                }
+
+                std::reverse(solution.cycleIndices[c].begin() + innerStart, solution.cycleIndices[c].begin() + innerEnd + 1);
+                solution.updatePointPositions();
+            }
+            else
+            {
+                // 0. Remove insertedNeighbour from its current cycle
+                auto [insertedCycle, insertedPos] = solution.getPointPosition(insertedNeighbour);
+                solution.cycleIndices[insertedCycle].erase(solution.cycleIndices[insertedCycle].begin() + insertedPos);
+
+                // 1. Find position of whichPoint
+                auto [targetCycle, targetPos] = solution.getPointPosition(whichPoint);
+
+                // 2. Insert insertedNeighbour before or after whichPoint depending on whichSide
+                if (whichSide == -1)
+                {
+                    solution.cycleIndices[targetCycle].insert(solution.cycleIndices[targetCycle].begin() + targetPos, insertedNeighbour);
+                }
+                else // whichSide == 1
+                {
+                    solution.cycleIndices[targetCycle].insert(solution.cycleIndices[targetCycle].begin() + targetPos + 1, insertedNeighbour);
+                }
+
+                solution.updatePointPositions();
+
+                // 4. Remove removedPoint from its current cycle
+                auto [removedCycle, removedPos] = solution.getPointPosition(removedPoint);
+                solution.cycleIndices[removedCycle].erase(solution.cycleIndices[removedCycle].begin() + removedPos);
+
+                // 5. Insert removedPoint after placedAfter
+                auto [placedAfterCycle, placedAfterPos] = solution.getPointPosition(placedAfter);
+                solution.cycleIndices[placedAfterCycle].insert(solution.cycleIndices[placedAfterCycle].begin() + placedAfterPos + 1, removedPoint);
+
+                solution.calculateScore(distanceMatrix);
+
+                // 6. Update point positions again
+                solution.updatePointPositions();
+            }
+        }
+    }
+
     return solution;
 }
 
 void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    int iterations = 100;
+    int iterations = 1;
 
     // 0. Regret Cycle Weighted Heuristic
     double minHeuristicScore = std::numeric_limits<double>::max();
@@ -1989,8 +2231,6 @@ void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         totalRandomSteepestCandidatesScore += score2;
         if (score2 == minRandomSteepestCandidatesScore)
             bestRandomSteepestCandidatesSolution = solution2;
-        if (abs(score2 - score1) > 1e-3)
-            std::cout << score2 << " " << score1 << std::endl;
     }
 
     // Print results
@@ -2013,7 +2253,7 @@ void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 int main(int argc, char *argv[])
 {
     std::string filepath = argv[1];
-    std::vector<Point> points = loadPointsFromFile(filepath);
+    points = loadPointsFromFile(filepath);
     if (points.empty())
     {
         std::cerr << "No points loaded from the file!" << std::endl;

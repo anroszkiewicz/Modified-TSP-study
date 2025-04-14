@@ -12,16 +12,16 @@ Intelligent optimization methods course
 
 ### Running the code
 
-To run the code with `matplotlib-cpp`, you need to have `python3-dev` installed. Then, include links to Python's headers and libraries when compiling.
-
-Windows:
+To build the project, do:
 
 ```bash
-g++ -std=c++11 main.cpp -o myplot -DWITHOUT_NUMPY -I"C:\Users\user\AppData\Local\Programs\Python\Python311\Include" -L"C:\Users\user\AppData\Local\Programs\Python\Python311\libs" -lpython311
+make PYTHON_VERSION={your-python-version}
 ```
 
-Linux:
+And then run it with:
 
 ```bash
-g++ -std=c++11 main.cpp -o myplot -DWITHOUT_NUMPY -I/usr/include/python3.12 -lpython3.12
+./tsp-study TSPlib95/{test-file}.tsp
 ```
+
+Note: To run the code with `matplotlib-cpp`, you need to have `python3-dev` installed.

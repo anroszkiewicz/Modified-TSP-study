@@ -457,7 +457,7 @@ Solution localSearchCandidates(Solution solution, const std::vector<std::vector<
                             for (const int sideOther : sidesOther)
                             {
                                 // Check all possible lengths
-                                for (int l = 1; l < cycleSizes[neighbourCycle] - 1; l++)
+                                for (int l = 1; l <= 1; l++)
                                 {
                                     int indexRemoved1 = (i + side * l + cycleSizes[c]) % cycleSizes[c];
                                     int pointRemoved1 = solution.cycleIndices[c][indexRemoved1];

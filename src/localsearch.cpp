@@ -12,6 +12,7 @@
 
 #include "point.h"
 #include "solution.h"
+#include "move.h"
 #include "localsearch.h"
 
 Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
@@ -19,15 +20,20 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
     Solution solution;
     int n = distanceMatrix.size();
 
+    // int seed = 41; // dowolna liczba całkowita jako seed
+    // std::mt19937 rng(seed);
+
     // Generate a shuffled list of indices
     std::vector<int> indices(n);
     std::iota(indices.begin(), indices.end(), 0);
     std::shuffle(indices.begin(), indices.end(), std::mt19937(std::random_device()()));
+    // std::shuffle(indices.begin(), indices.end(), rng);
 
     // Create a vector with half 0s and half 1s
     std::vector<int> cycleAssignment(n, 0);
     std::fill(cycleAssignment.begin() + n / 2, cycleAssignment.end(), 1);
     std::shuffle(cycleAssignment.begin(), cycleAssignment.end(), std::mt19937(std::random_device()()));
+    // std::shuffle(cycleAssignment.begin(), cycleAssignment.end(), rng);
 
     // Assign points to cycles based on the cycleAssignment vector
     for (int i = 0; i < n; ++i)
@@ -37,7 +43,7 @@ Solution randomCycle(const std::vector<std::vector<double>> &distanceMatrix)
         else
             solution.cycleIndices[1].push_back(indices[i]);
     }
-
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -154,27 +160,85 @@ bool stepEdgeExchange(Solution &solution, const std::vector<std::vector<double>>
     std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
 
     double minDelta = 0.0;
-    int besti = -1;
-    int bestj = -1;
-    int bestc = -1;
+    int bestPos1 = -1;
+    int bestPos2 = -1;
+    int bestCycle = -1;
     bool foundSwap = false;
+    bool swappingVertices = true;
 
-    int point1, point2, cycleOfPoint1, cycleOfPoint2;
+    int point1, point2;
+    int cycleOfPoint1 = 0;
+    int cycleOfPoint2 = 1;
 
-    // Loop over each cycle
+    Move bestMove;
+    // Add vertex swap between 2 cycles
+    // For some reason it should always be a legal move
+    for (size_t i = 0; i < pointsInCycle1; ++i)
+    {
+        for (size_t j = 0; j < pointsInCycle2; ++j)
+        {
+            double delta = 0;
+            // Get all the neighbours of point 1
+            int next1;
+            int prev1;
+            point1 = solution.cycleIndices[cycleOfPoint1][i % pointsInCycle1];
+            next1 = solution.cycleIndices[cycleOfPoint1][(i + 1) % cycleSizes[cycleOfPoint1]];
+            prev1 = solution.cycleIndices[cycleOfPoint1][(i - 1 + cycleSizes[cycleOfPoint1]) % cycleSizes[cycleOfPoint1]];
+            // Get all the neighbours of point 2
+            int next2;
+            int prev2;
+            point2 = solution.cycleIndices[cycleOfPoint2][j % pointsInCycle1];
+            next2 = solution.cycleIndices[cycleOfPoint2][(j + 1) % cycleSizes[cycleOfPoint2]];
+            prev2 = solution.cycleIndices[cycleOfPoint2][(j - 1 + cycleSizes[cycleOfPoint2]) % cycleSizes[cycleOfPoint2]];
+            // Calculate delta
+            delta -= distanceMatrix[point1][next1];
+            delta -= distanceMatrix[point1][prev1];
+            delta -= distanceMatrix[point2][next2];
+            delta -= distanceMatrix[point2][prev2];
+            delta += distanceMatrix[point1][next2];
+            delta += distanceMatrix[point1][prev2];
+            delta += distanceMatrix[point2][next1];
+            delta += distanceMatrix[point2][prev1];
+            // Only add moves that can improve the solution
+            if (strategy == "greedy" && delta < -epsilon)
+            {
+                int pos1 = i;
+                int pos2 = j;
+                // Ensure the points are in separate cycles
+                if (cycleOfPoint1 != cycleOfPoint2)
+                {
+                    std::swap(solution.cycleIndices[cycleOfPoint1][pos1], solution.cycleIndices[cycleOfPoint2][pos2]);
+                    std::swap(solution.pointPositions[point1], solution.pointPositions[point2]);
+                }
+                return true;
+            }
+            if (delta < minDelta - epsilon)
+            {
+                bestPos1 = i;
+                bestPos2 = j;
+                minDelta = delta;
+                foundSwap = true;
+            }
+        }
+    }
     for (size_t c = 0; c < 2; ++c)
     {
         // Loop over each pair of points in the solution
         for (size_t i = 0; i < cycleSizes[c]; ++i)
         {
-            for (size_t j = 1; j < cycleSizes[c] - 1; ++j) // Avoid reversing whole cycle
+            for (size_t j = 0; j < cycleSizes[c]; ++j) // Avoid reversing whole cycle
             {
+                // Skip reversing the entire cycle
+                if (i == j || (j + 1) % cycleSizes[c] == i || (j + 2) % cycleSizes[c] == i)
+                {
+                    continue;
+                }
                 double delta = 0;
                 int prev1, next2;
                 point1 = solution.cycleIndices[c][i];
                 prev1 = solution.cycleIndices[c][(i - 1 + cycleSizes[c]) % cycleSizes[c]];
-                point2 = solution.cycleIndices[c][(i + j) % cycleSizes[c]];
-                next2 = solution.cycleIndices[c][(i + j + 1) % cycleSizes[c]];
+                point2 = solution.cycleIndices[c][j];
+                next2 = solution.cycleIndices[c][(j + 1) % cycleSizes[c]];
 
                 delta -= distanceMatrix[point1][prev1];
                 delta -= distanceMatrix[point2][next2];
@@ -183,40 +247,30 @@ bool stepEdgeExchange(Solution &solution, const std::vector<std::vector<double>>
 
                 if (delta < minDelta - epsilon)
                 {
-                    bestc = c;
-                    besti = i;
-                    bestj = j;
+                    bestMove = EdgeMove({prev1, point1}, {point2, next2}, delta);
+                    bestCycle = c;
+                    bestPos1 = i;
+                    bestPos2 = j;
                     minDelta = delta;
                     foundSwap = true;
+                    swappingVertices = false; // Change strategy
                 }
 
                 if (strategy == "greedy" && delta < -epsilon)
                 {
-                    // Perform the swap immediately
-                    size_t endIdx = (i + j) % cycleSizes[c];
-
-                    if (endIdx > i)
+                    bestPos1 = i;
+                    bestPos2 = j;
+                    if (bestPos1 < bestPos2)
                     {
                         // Normal case: reverse directly
-                        std::reverse(solution.cycleIndices[c].begin() + i, solution.cycleIndices[c].begin() + endIdx + 1);
+                        std::reverse(solution.cycleIndices[bestCycle].begin() + bestPos1, solution.cycleIndices[bestCycle].begin() + bestPos2 + 1);
+                        solution.updatePointPositions();
                     }
                     else
                     {
                         // Wrap-around case
-                        std::vector<int> temp;
-
-                        // Move front elements to the back
-                        temp.insert(temp.end(), solution.cycleIndices[c].begin() + endIdx + 1, solution.cycleIndices[c].end());
-                        temp.insert(temp.end(), solution.cycleIndices[c].begin(), solution.cycleIndices[c].begin() + endIdx + 1);
-
-                        // Reverse the required section
-                        std::reverse(temp.begin(), temp.begin() + (cycleSizes[c] - i));
-
-                        // Restore back to the original vector
-                        for (size_t k = 0; k < temp.size(); ++k)
-                        {
-                            solution.cycleIndices[c][(i + k) % cycleSizes[c]] = temp[k];
-                        }
+                        std::reverse(solution.cycleIndices[bestCycle].begin() + bestPos2 + 1, solution.cycleIndices[bestCycle].begin() + bestPos1);
+                        solution.updatePointPositions();
                     }
                     return true;
                 }
@@ -230,33 +284,33 @@ bool stepEdgeExchange(Solution &solution, const std::vector<std::vector<double>>
     }
     else
     {
-        // Perform the best swap found
-        size_t endIdx = (besti + bestj) % cycleSizes[bestc];
-
-        if (endIdx > besti)
+        // Check which type of a move to do
+        if (swappingVertices)
         {
-            // Normal case: reverse directly
-            std::reverse(solution.cycleIndices[bestc].begin() + besti, solution.cycleIndices[bestc].begin() + endIdx + 1);
+            //  Swap the points between the two cycles
+            int pointToSwap1 = solution.cycleIndices[0][bestPos1];
+            int pointToSwap2 = solution.cycleIndices[1][bestPos2];
+            // std::cout << "Move vertices " << pointToSwap1 << " " << pointToSwap2 << " score " << minDelta << std::endl;
+            std::swap(solution.cycleIndices[0][bestPos1], solution.cycleIndices[1][bestPos2]);
+            std::swap(solution.pointPositions[pointToSwap1], solution.pointPositions[pointToSwap2]);
         }
         else
         {
-            // Wrap-around case
-            std::vector<int> temp;
-
-            // Move front elements to the back
-            temp.insert(temp.end(), solution.cycleIndices[bestc].begin() + endIdx + 1, solution.cycleIndices[bestc].end());
-            temp.insert(temp.end(), solution.cycleIndices[bestc].begin(), solution.cycleIndices[bestc].begin() + endIdx + 1);
-
-            // Reverse the required section
-            std::reverse(temp.begin(), temp.begin() + (cycleSizes[bestc] - besti));
-
-            // Restore back to the original vector
-            for (size_t k = 0; k < temp.size(); ++k)
+            // Get current positions of the points in the cycles
+            auto [cycle1, pos1] = solution.getPointPosition(bestMove.cut1.next);
+            auto [cycle2, pos2] = solution.getPointPosition(bestMove.cut2.prev);
+            int c = cycle1; // Both cycles are the same
+            // Ensure position 1 is before position 2
+            if (pos1 > pos2)
             {
-                solution.cycleIndices[bestc][(besti + k) % cycleSizes[bestc]] = temp[k];
+                std::swap(pos1, pos2);
+                std::swap(bestMove.cut1, bestMove.cut2);
             }
-            return true;
+            std::reverse(solution.cycleIndices[c].begin() + pos1, solution.cycleIndices[c].begin() + pos2 + 1);
+            solution.updatePointPositions();
+            // std::cout << ": (" << bestMove.cut1.prev << " " << bestMove.cut1.next << ") and (" << bestMove.cut2.prev << " " << bestMove.cut2.next << ")" << " score " << bestMove.delta << std::endl;
         }
+        return true;
     }
     return foundSwap;
 }
@@ -289,6 +343,7 @@ Solution localSearchVertex(Solution solution, const std::vector<std::vector<doub
     {
         improvement = stepPointExchange(solution, distanceMatrix, strategy);
     }
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -320,6 +375,7 @@ Solution localSearchEdges(Solution solution, const std::vector<std::vector<doubl
     {
         improvement = stepEdgeExchange(solution, distanceMatrix, strategy);
     }
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -414,6 +470,6 @@ Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &
         auto t2 = std::chrono::high_resolution_clock::now();
         runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
     }
-
+    bestSolution.updatePointPositions();
     return bestSolution;
 }

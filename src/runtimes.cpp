@@ -6,12 +6,17 @@
 #include <limits>
 #include <random>
 #include <chrono>
+#include <queue>
 
 #include "utils.h"
 #include "solution.h"
 #include "point.h"
+#include "move.h"
+#include "cut.h"
+#include "vertexneighbourhood.h"
 #include "greedyheuristics.h"
 #include "localsearch.h"
+#include "optimization.h"
 
 void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
@@ -500,4 +505,122 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     std::cout << "Min: " << minGreedyGreedyEdgeTime << " Max: " << maxGreedyGreedyEdgeTime
               << " Avg: " << (totalGreedyGreedyEdgeTime / iterations) << "\n";
     plotSolution(bestGreedyGreedyEdgeSolution, points, distanceMatrix, "Greedy + Greedy Local Search + Edge Exchange");
+}
+
+void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
+{
+    int iterations = 100;
+
+    // 0. Random + Steepest Descent + Edge Exchange
+    double minRandomSteepestEdgeScore = std::numeric_limits<double>::max();
+    double maxRandomSteepestEdgeScore = std::numeric_limits<double>::lowest();
+    double totalRandomSteepestEdgeScore = 0.0;
+    Solution bestRandomSteepestEdgeSolution;
+    long minRandomSteepestEdgeTime = std::numeric_limits<long>::max();
+    long maxRandomSteepestEdgeTime = std::numeric_limits<long>::lowest();
+    long totalRandomSteepestEdgeTime = 0.0;
+
+    // 1. Random + Priority Queue + Memory + Steepest Descent + Edge Exchange
+    double minRandomMemorySteepestEdgeScore = std::numeric_limits<double>::max();
+    double maxRandomMemorySteepestEdgeScore = std::numeric_limits<double>::lowest();
+    double totalRandomMemorySteepestEdgeScore = 0.0;
+    Solution bestRandomMemorySteepestEdgeSolution;
+    long minRandomMemorySteepestEdgeTime = std::numeric_limits<long>::max();
+    long maxRandomMemorySteepestEdgeTime = std::numeric_limits<long>::lowest();
+    long totalRandomMemorySteepestEdgeTime = 0.0;
+
+    // 2. Random + Steepest Descent + Candidate Moves
+    double minRandomSteepestCandidatesScore = std::numeric_limits<double>::max();
+    double maxRandomSteepestCandidatesScore = std::numeric_limits<double>::lowest();
+    double totalRandomSteepestCandidatesScore = 0.0;
+    Solution bestRandomSteepestCandidatesSolution;
+    long minRandomSteepestCandidatesTime = std::numeric_limits<long>::max();
+    long maxRandomSteepestCandidatesTime = std::numeric_limits<long>::lowest();
+    long totalRandomSteepestCandidatesTime = 0.0;
+
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+    for (int i = 0; i < iterations; ++i)
+    {
+        std::cout << "Progress: " << i << "/" << iterations << std::endl;
+
+        // Generate initial random and solution
+        Solution initialRandom = randomCycle(distanceMatrix);
+
+        // 0. Random + Steepest Descent + Edge Exchange
+        auto t1 = std::chrono::high_resolution_clock::now();
+        Solution solution0 = localSearchEdges(initialRandom, distanceMatrix, "steepest");
+        auto t2 = std::chrono::high_resolution_clock::now();
+
+        solution0.calculateScore(distanceMatrix);
+        double score0 = solution0.getScore();
+        minRandomSteepestEdgeScore = std::min(minRandomSteepestEdgeScore, score0);
+        maxRandomSteepestEdgeScore = std::max(maxRandomSteepestEdgeScore, score0);
+        totalRandomSteepestEdgeScore += score0;
+        if (score0 == minRandomSteepestEdgeScore)
+            bestRandomSteepestEdgeSolution = solution0;
+
+        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minRandomSteepestEdgeTime = std::min(minRandomSteepestEdgeTime, time0);
+        maxRandomSteepestEdgeTime = std::max(maxRandomSteepestEdgeTime, time0);
+        totalRandomSteepestEdgeTime += time0;
+
+        // 1. Random + Priority Queue + Memory + Steepest Descent + Edge Exchange
+        t1 = std::chrono::high_resolution_clock::now();
+        Solution solution1 = localSearchMemory(initialRandom, distanceMatrix);
+        t2 = std::chrono::high_resolution_clock::now();
+
+        solution1.calculateScore(distanceMatrix);
+        double score1 = solution1.getScore();
+        minRandomMemorySteepestEdgeScore = std::min(minRandomMemorySteepestEdgeScore, score1);
+        maxRandomMemorySteepestEdgeScore = std::max(maxRandomMemorySteepestEdgeScore, score1);
+        totalRandomMemorySteepestEdgeScore += score1;
+        if (score1 == minRandomMemorySteepestEdgeScore)
+            bestRandomMemorySteepestEdgeSolution = solution1;
+
+        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minRandomMemorySteepestEdgeTime = std::min(minRandomMemorySteepestEdgeTime, time1);
+        maxRandomMemorySteepestEdgeTime = std::max(maxRandomMemorySteepestEdgeTime, time1);
+        totalRandomMemorySteepestEdgeTime += time1;
+
+        // 2. Random + Steepest Descent + Candidate Moves
+        t1 = std::chrono::high_resolution_clock::now();
+        Solution solution2 = localSearchCandidates(initialRandom, distanceMatrix);
+        t2 = std::chrono::high_resolution_clock::now();
+
+        solution2.calculateScore(distanceMatrix);
+        double score2 = solution2.getScore();
+        minRandomSteepestCandidatesScore = std::min(minRandomSteepestCandidatesScore, score2);
+        maxRandomSteepestCandidatesScore = std::max(maxRandomSteepestCandidatesScore, score2);
+        totalRandomSteepestCandidatesScore += score2;
+        if (score2 == minRandomSteepestCandidatesScore)
+            bestRandomSteepestCandidatesSolution = solution2;
+
+        auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minRandomSteepestCandidatesTime = std::min(minRandomSteepestCandidatesTime, time2);
+        maxRandomSteepestCandidatesTime = std::max(maxRandomSteepestCandidatesTime, time2);
+        totalRandomSteepestCandidatesTime += time2;
+    }
+
+    // Print results
+    std::cout << "\nRandom + Steepest Descent + Edge Exchange:\n";
+    std::cout << "Min: " << minRandomSteepestEdgeScore << " Max: " << maxRandomSteepestEdgeScore
+              << " Avg: " << (totalRandomSteepestEdgeScore / iterations) << "\n";
+    std::cout << "Min: " << minRandomSteepestEdgeTime << " Max: " << maxRandomSteepestEdgeTime
+              << " Avg: " << (totalRandomSteepestEdgeTime / iterations) << "\n";
+    plotSolution(bestRandomSteepestEdgeSolution, points, distanceMatrix, "Random + Steepest Descent + Edge Exchange");
+
+    std::cout << "\nRandom + Memory + Steepest Descent + Edge Exchange:\n";
+    std::cout << "Min: " << minRandomMemorySteepestEdgeScore << " Max: " << maxRandomMemorySteepestEdgeScore
+              << " Avg: " << (totalRandomMemorySteepestEdgeScore / iterations) << "\n";
+    std::cout << "Min: " << minRandomMemorySteepestEdgeTime << " Max: " << maxRandomMemorySteepestEdgeTime
+              << " Avg: " << (totalRandomMemorySteepestEdgeTime / iterations) << "\n";
+    plotSolution(bestRandomMemorySteepestEdgeSolution, points, distanceMatrix, "Random + Memory + Steepest Descent + Edge Exchange");
+
+    std::cout << "\nRandom + Steepest Descent + Candidate Moves:\n";
+    std::cout << "Min: " << minRandomSteepestCandidatesScore << " Max: " << maxRandomSteepestCandidatesScore
+              << " Avg: " << (totalRandomSteepestCandidatesScore / iterations) << "\n";
+    std::cout << "Min: " << minRandomSteepestCandidatesTime << " Max: " << maxRandomSteepestCandidatesTime
+              << " Avg: " << (totalRandomSteepestCandidatesTime / iterations) << "\n";
+    plotSolution(bestRandomSteepestCandidatesSolution, points, distanceMatrix, "Random + Steepest Descent + Candidate Moves");
 }

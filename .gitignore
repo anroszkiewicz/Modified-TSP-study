@@ -1,2 +1,6 @@
-*.exe
+build/
 .vscode/
+
+*.exe
+*.png
+tsp-study

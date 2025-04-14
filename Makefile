@@ -1,6 +1,11 @@
+PYTHON_VERSION ?= python3
+
+PYTHON_CFLAGS  := $(shell $(PYTHON_VERSION)-config --includes)
+PYTHON_LDFLAGS := $(shell $(PYTHON_VERSION)-config --embed --ldflags 2>/dev/null || $(PYTHON_VERSION)-config --ldflags)
+
 CXX = g++
-CXXFLAGS = -Wall -std=c++11 -Iinclude -DWITHOUT_NUMPY -I/usr/include/python3.12
-LDFLAGS = -lpython3.12
+CXXFLAGS = -Wall -std=c++11 -Iinclude -DWITHOUT_NUMPY $(PYTHON_CFLAGS)
+LDFLAGS  = $(PYTHON_LDFLAGS)
 
 SRC_DIR = src
 BUILD_DIR = build

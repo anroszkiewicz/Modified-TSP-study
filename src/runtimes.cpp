@@ -7,6 +7,7 @@
 #include <random>
 #include <chrono>
 #include <queue>
+#include <utility>
 
 #include "utils.h"
 #include "solution.h"
@@ -17,6 +18,7 @@
 #include "greedyheuristics.h"
 #include "localsearch.h"
 #include "optimization.h"
+#include "extendedlocalsearch.h"
 
 void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
@@ -623,4 +625,147 @@ void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     std::cout << "Min: " << minRandomSteepestCandidatesTime << " Max: " << maxRandomSteepestCandidatesTime
               << " Avg: " << (totalRandomSteepestCandidatesTime / iterations) << "\n";
     plotSolution(bestRandomSteepestCandidatesSolution, points, distanceMatrix, "Random + Steepest Descent + Candidate Moves");
+}
+
+void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
+{
+    int iterations = 10;
+
+    // 1. Multiple start local search
+    double minMultipleStartScore = std::numeric_limits<double>::max();
+    double maxMultipleStartScore = std::numeric_limits<double>::lowest();
+    double totalMultipleStartScore = 0.0;
+    Solution bestMultipleStartSolution;
+    long minMultipleStartTime = std::numeric_limits<long>::max();
+    long maxMultipleStartTime = std::numeric_limits<long>::lowest();
+    long totalMultipleStartTime = 0.0;
+
+    // 2. Iterated local search
+    double minIteratedScore = std::numeric_limits<double>::max();
+    double maxIteratedScore = std::numeric_limits<double>::lowest();
+    double totalIteratedScore = 0.0;
+    Solution bestIteratedSolution;
+    long minIteratedTime = std::numeric_limits<long>::max();
+    long maxIteratedTime = std::numeric_limits<long>::lowest();
+    long totalIteratedTime = 0.0;
+    int minIteratedIter = std::numeric_limits<int>::max();
+    int maxIteratedIter = std::numeric_limits<int>::lowest();
+    int totalIteratedIter = 0.0;
+
+    // 3. Large neighborhood search
+    double minLargeScore = std::numeric_limits<double>::max();
+    double maxLargeScore = std::numeric_limits<double>::lowest();
+    double totalLargeScore = 0.0;
+    Solution bestLargeSolution;
+    long minLargeTime = std::numeric_limits<long>::max();
+    long maxLargeTime = std::numeric_limits<long>::lowest();
+    long totalLargeTime = 0.0;
+    int minLargeIter = std::numeric_limits<int>::max();
+    int maxLargeIter = std::numeric_limits<int>::lowest();
+    int totalLargeIter = 0.0;
+
+    for (int i = 0; i < iterations; ++i)
+    {
+        std::cout << "Progress: " << i << "/" << iterations << std::endl;
+
+        // 1. Multiple start local search
+        auto t1 = std::chrono::high_resolution_clock::now();
+        Solution solution0 = multipleStartLocalSearch(distanceMatrix);
+        auto t2 = std::chrono::high_resolution_clock::now();
+
+        solution0.calculateScore(distanceMatrix);
+        double score0 = solution0.getScore();
+        minMultipleStartScore = std::min(minMultipleStartScore, score0);
+        maxMultipleStartScore = std::max(maxMultipleStartScore, score0);
+        totalMultipleStartScore += score0;
+        if (score0 == minMultipleStartScore)
+            bestMultipleStartSolution = solution0;
+
+        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minMultipleStartTime = std::min(minMultipleStartTime, time0);
+        maxMultipleStartTime = std::max(maxMultipleStartTime, time0);
+        totalMultipleStartTime += time0;
+
+        // 2. Iterated local search
+        t1 = std::chrono::high_resolution_clock::now();
+        std::pair <Solution, int> result1 = iteratedLocalSearch(distanceMatrix, time0);
+        t2 = std::chrono::high_resolution_clock::now();
+
+        Solution solution1 = result1.first;
+        int iter1 = result1.second;
+
+        solution1.calculateScore(distanceMatrix);
+        double score1 = solution1.getScore();
+        minIteratedScore = std::min(minIteratedScore, score1);
+        maxIteratedScore = std::max(maxIteratedScore, score1);
+        totalIteratedScore += score1;
+        if (score1 == minIteratedScore)
+            bestIteratedSolution = solution1;
+
+        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minIteratedTime = std::min(minIteratedTime, time1);
+        maxIteratedTime = std::max(maxIteratedTime, time1);
+        totalIteratedTime += time1;
+
+        minIteratedIter = std::min(minIteratedIter, iter1);
+        maxIteratedIter = std::max(maxIteratedIter, iter1);
+        totalIteratedIter += iter1;
+
+        // 3. Large neighborhood search
+        t1 = std::chrono::high_resolution_clock::now();
+        std::pair <Solution, int> result2 = largeNeighborhoodSearch(distanceMatrix, time0);
+        t2 = std::chrono::high_resolution_clock::now();
+
+        Solution solution2 = result2.first;
+        int iter2 = result2.second;
+
+        solution2.calculateScore(distanceMatrix);
+        double score2 = solution2.getScore();
+        minLargeScore = std::min(minLargeScore, score2);
+        maxLargeScore = std::max(maxLargeScore, score2);
+        totalLargeScore += score2;
+        if (score2 == minLargeScore)
+            bestLargeSolution = solution2;
+
+        auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        minLargeTime = std::min(minLargeTime, time2);
+        maxLargeTime = std::max(maxLargeTime, time2);
+        totalLargeTime += time2;
+
+        minLargeIter = std::min(minLargeIter, iter2);
+        maxLargeIter = std::max(maxLargeIter, iter2);
+        totalLargeIter += iter2;
+    }
+
+    // Print results
+    std::cout << "\nMultiple start local search:\n";
+    std::cout << "Min: " << minMultipleStartScore << " Max: " << maxMultipleStartScore
+              << " Avg: " << (totalMultipleStartScore / iterations) << "\n";
+    std::cout << "Min: " << minMultipleStartTime << " Max: " << maxMultipleStartTime
+              << " Avg: " << (totalMultipleStartTime / iterations) << "\n";
+    plotSolution(bestMultipleStartSolution, points, distanceMatrix, "Multiple start local search");
+
+    std::cout << "\nIterated local search:\n";
+    std::cout << "Results\n";
+    std::cout << "Min: " << minIteratedScore << " Max: " << maxIteratedScore
+              << " Avg: " << (totalIteratedScore / iterations) << "\n";
+    std::cout << "Time\n";
+    std::cout << "Min: " << minIteratedTime << " Max: " << maxIteratedTime
+              << " Avg: " << (totalIteratedTime / iterations) << "\n";
+    std::cout << "Iterations\n";
+    std::cout << "Min: " << minIteratedIter << " Max: " << maxIteratedIter
+              << " Avg: " << (totalIteratedIter / iterations) << "\n";
+    plotSolution(bestIteratedSolution, points, distanceMatrix, "Iterated local search");
+
+    std::cout << "\nLarge neighborhood search:\n";
+    std::cout << "Results\n";
+    std::cout << "Min: " << minLargeScore << " Max: " << maxLargeScore
+              << " Avg: " << (totalLargeScore / iterations) << "\n";
+    std::cout << "Time\n";
+    std::cout << "Min: " << minLargeTime << " Max: " << maxLargeTime
+              << " Avg: " << (totalLargeTime / iterations) << "\n";
+    std::cout << "Iterations\n";
+    std::cout << "Min: " << minLargeIter << " Max: " << maxLargeIter
+              << " Avg: " << (totalLargeIter / iterations) << "\n";
+    plotSolution(bestLargeSolution, points, distanceMatrix, "Large neighborhood search");
 }

@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     // Create the adjacency list
     std::vector<std::vector<double>> distanceMatrix = createdistanceMatrix(points);
 
-    lab2(points, distanceMatrix);
+    lab3(points, distanceMatrix);
 
     return 0;
 }

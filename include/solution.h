@@ -9,6 +9,7 @@ struct Solution
     double cycle1Score;
     double cycle2Score;
     double score;
+    std::vector<std::pair<int, int>> pointPositions;
 
     Solution();
 
@@ -23,6 +24,10 @@ struct Solution
     double getCycle2Score(const std::vector<std::vector<double>> &distanceMatrix);
 
     double calculateCycleDistance(const std::vector<int> &cycle, const std::vector<std::vector<double>> &distanceMatrix) const;
+
+    void updatePointPositions();
+
+    std::pair<int, int> getPointPosition(int pointIndex) const;
 };
 
 #endif

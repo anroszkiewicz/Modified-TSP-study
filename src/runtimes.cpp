@@ -274,9 +274,9 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score0 == minRandomWalk1)
             bestRandomWalk1 = solution0;
 
-        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minRandomWalk1time = std::min(minRandomWalk1time, time0);
-        maxRandomWalk1time = std::max(maxRandomWalk1time, time0);
+        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minRandomWalk1time = std::min(minRandomWalk1time, static_cast<long>(time0));
+        maxRandomWalk1time = std::max(maxRandomWalk1time, static_cast<long>(time0));
         totalRandomWalk1time += time0;
 
         // 1. Random + Steepest Descent + Point Exchange
@@ -292,9 +292,9 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score1 == minRandomSteepestPointScore)
             bestRandomSteepestPointSolution = solution1;
 
-        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minRandomSteepestPointTime = std::min(minRandomSteepestPointTime, time1);
-        maxRandomSteepestPointTime = std::max(maxRandomSteepestPointTime, time1);
+        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minRandomSteepestPointTime = std::min(minRandomSteepestPointTime, static_cast<long>(time1));
+        maxRandomSteepestPointTime = std::max(maxRandomSteepestPointTime, static_cast<long>(time1));
         totalRandomSteepestPointTime += time1;
 
         // 2. Random + Steepest Descent + Edge Exchange
@@ -310,9 +310,9 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score2 == minRandomSteepestEdgeScore)
             bestRandomSteepestEdgeSolution = solution2;
 
-        auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minRandomSteepestEdgeTime = std::min(minRandomSteepestEdgeTime, time2);
-        maxRandomSteepestEdgeTime = std::max(maxRandomSteepestEdgeTime, time2);
+        auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minRandomSteepestEdgeTime = std::min(minRandomSteepestEdgeTime, static_cast<long>(time2));
+        maxRandomSteepestEdgeTime = std::max(maxRandomSteepestEdgeTime, static_cast<long>(time2));
         totalRandomSteepestEdgeTime += time2;
 
         // 3. Random + Greedy Local Search + Point Exchange
@@ -328,9 +328,9 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score3 == minRandomGreedyPointScore)
             bestRandomGreedyPointSolution = solution3;
 
-        auto time3 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minRandomGreedyPointTime = std::min(minRandomGreedyPointTime, time3);
-        maxRandomGreedyPointTime = std::max(maxRandomGreedyPointTime, time3);
+        auto time3 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minRandomGreedyPointTime = std::min(minRandomGreedyPointTime, static_cast<long>(time3));
+        maxRandomGreedyPointTime = std::max(maxRandomGreedyPointTime, static_cast<long>(time3));
         totalRandomGreedyPointTime += time3;
 
         // 4. Random + Greedy Local Search + Edge Exchange
@@ -346,9 +346,9 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score4 == minRandomGreedyEdgeScore)
             bestRandomGreedyEdgeSolution = solution4;
 
-        auto time4 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minRandomGreedyEdgeTime = std::min(minRandomGreedyEdgeTime, time4);
-        maxRandomGreedyEdgeTime = std::max(maxRandomGreedyEdgeTime, time4);
+        auto time4 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minRandomGreedyEdgeTime = std::min(minRandomGreedyEdgeTime, static_cast<long>(time4));
+        maxRandomGreedyEdgeTime = std::max(maxRandomGreedyEdgeTime, static_cast<long>(time4));
         totalRandomGreedyEdgeTime += time4;
 
         // 5. Random Walk 2
@@ -364,7 +364,7 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score5 == minRandomWalk2)
             bestRandomWalk2 = solution5;
 
-        auto time5 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        auto time5 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
         // 6. Greedy + Steepest Descent + Point Exchange
         t1 = std::chrono::high_resolution_clock::now();
@@ -379,9 +379,9 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score6 == minGreedySteepestPointScore)
             bestGreedySteepestPointSolution = solution6;
 
-        auto time6 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minGreedySteepestPointTime = std::min(minGreedySteepestPointTime, time6);
-        maxGreedySteepestPointTime = std::max(maxGreedySteepestPointTime, time6);
+        auto time6 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minGreedySteepestPointTime = std::min(minGreedySteepestPointTime, static_cast<long>(time6));
+        maxGreedySteepestPointTime = std::max(maxGreedySteepestPointTime, static_cast<long>(time6));
         totalGreedySteepestPointTime += time6;
 
         // 7. Greedy + Steepest Descent + Edge Exchange
@@ -397,9 +397,9 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score7 == minGreedySteepestEdgeScore)
             bestGreedySteepestEdgeSolution = solution7;
 
-        auto time7 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minGreedySteepestEdgeTime = std::min(minGreedySteepestEdgeTime, time7);
-        maxGreedySteepestEdgeTime = std::max(maxGreedySteepestEdgeTime, time7);
+        auto time7 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minGreedySteepestEdgeTime = std::min(minGreedySteepestEdgeTime, static_cast<long>(time7));
+        maxGreedySteepestEdgeTime = std::max(maxGreedySteepestEdgeTime, static_cast<long>(time7));
         totalGreedySteepestEdgeTime += time7;
 
         // 8. Greedy + Greedy Local Search + Point Exchange
@@ -415,9 +415,9 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score8 == minGreedyGreedyPointScore)
             bestGreedyGreedyPointSolution = solution8;
 
-        auto time8 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minGreedyGreedyPointTime = std::min(minGreedyGreedyPointTime, time8);
-        maxGreedyGreedyPointTime = std::max(maxGreedyGreedyPointTime, time8);
+        auto time8 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minGreedyGreedyPointTime = std::min(minGreedyGreedyPointTime, static_cast<long>(time8));
+        maxGreedyGreedyPointTime = std::max(maxGreedyGreedyPointTime, static_cast<long>(time8));
         totalGreedyGreedyPointTime += time8;
 
         // 9. Greedy + Greedy Local Search + Edge Exchange
@@ -433,9 +433,9 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score9 == minGreedyGreedyEdgeScore)
             bestGreedyGreedyEdgeSolution = solution9;
 
-        auto time9 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minGreedyGreedyEdgeTime = std::min(minGreedyGreedyEdgeTime, time9);
-        maxGreedyGreedyEdgeTime = std::max(maxGreedyGreedyEdgeTime, time9);
+        auto time9 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minGreedyGreedyEdgeTime = std::min(minGreedyGreedyEdgeTime, static_cast<long>(time9));
+        maxGreedyGreedyEdgeTime = std::max(maxGreedyGreedyEdgeTime, static_cast<long>(time9));
         totalGreedyGreedyEdgeTime += time9;
     }
 
@@ -562,9 +562,9 @@ void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score0 == minRandomSteepestEdgeScore)
             bestRandomSteepestEdgeSolution = solution0;
 
-        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minRandomSteepestEdgeTime = std::min(minRandomSteepestEdgeTime, time0);
-        maxRandomSteepestEdgeTime = std::max(maxRandomSteepestEdgeTime, time0);
+        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minRandomSteepestEdgeTime = std::min(minRandomSteepestEdgeTime, static_cast<long>(time0));
+        maxRandomSteepestEdgeTime = std::max(maxRandomSteepestEdgeTime, static_cast<long>(time0));
         totalRandomSteepestEdgeTime += time0;
 
         // 1. Random + Priority Queue + Memory + Steepest Descent + Edge Exchange
@@ -580,9 +580,9 @@ void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score1 == minRandomMemorySteepestEdgeScore)
             bestRandomMemorySteepestEdgeSolution = solution1;
 
-        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minRandomMemorySteepestEdgeTime = std::min(minRandomMemorySteepestEdgeTime, time1);
-        maxRandomMemorySteepestEdgeTime = std::max(maxRandomMemorySteepestEdgeTime, time1);
+        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minRandomMemorySteepestEdgeTime = std::min(minRandomMemorySteepestEdgeTime, static_cast<long>(time1));
+        maxRandomMemorySteepestEdgeTime = std::max(maxRandomMemorySteepestEdgeTime, static_cast<long>(time1));
         totalRandomMemorySteepestEdgeTime += time1;
 
         // 2. Random + Steepest Descent + Candidate Moves
@@ -598,9 +598,9 @@ void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score2 == minRandomSteepestCandidatesScore)
             bestRandomSteepestCandidatesSolution = solution2;
 
-        auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minRandomSteepestCandidatesTime = std::min(minRandomSteepestCandidatesTime, time2);
-        maxRandomSteepestCandidatesTime = std::max(maxRandomSteepestCandidatesTime, time2);
+        auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minRandomSteepestCandidatesTime = std::min(minRandomSteepestCandidatesTime, static_cast<long>(time2));
+        maxRandomSteepestCandidatesTime = std::max(maxRandomSteepestCandidatesTime, static_cast<long>(time2));
         totalRandomSteepestCandidatesTime += time2;
     }
 
@@ -681,14 +681,14 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score0 == minMultipleStartScore)
             bestMultipleStartSolution = solution0;
 
-        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minMultipleStartTime = std::min(minMultipleStartTime, time0);
-        maxMultipleStartTime = std::max(maxMultipleStartTime, time0);
+        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minMultipleStartTime = std::min(minMultipleStartTime, static_cast<long>(time0));
+        maxMultipleStartTime = std::max(maxMultipleStartTime, static_cast<long>(time0));
         totalMultipleStartTime += time0;
 
         // 2. Iterated local search
         t1 = std::chrono::high_resolution_clock::now();
-        std::pair <Solution, int> result1 = iteratedLocalSearch(distanceMatrix, time0);
+        std::pair<Solution, int> result1 = iteratedLocalSearch(distanceMatrix, time0);
         t2 = std::chrono::high_resolution_clock::now();
 
         Solution solution1 = result1.first;
@@ -702,9 +702,9 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score1 == minIteratedScore)
             bestIteratedSolution = solution1;
 
-        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minIteratedTime = std::min(minIteratedTime, time1);
-        maxIteratedTime = std::max(maxIteratedTime, time1);
+        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minIteratedTime = std::min(minIteratedTime, static_cast<long>(time1));
+        maxIteratedTime = std::max(maxIteratedTime, static_cast<long>(time1));
         totalIteratedTime += time1;
 
         minIteratedIter = std::min(minIteratedIter, iter1);
@@ -713,7 +713,7 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // 3. Large neighborhood search
         t1 = std::chrono::high_resolution_clock::now();
-        std::pair <Solution, int> result2 = largeNeighborhoodSearch(distanceMatrix, time0);
+        std::pair<Solution, int> result2 = largeNeighborhoodSearch(distanceMatrix, time0);
         t2 = std::chrono::high_resolution_clock::now();
 
         Solution solution2 = result2.first;
@@ -727,9 +727,9 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         if (score2 == minLargeScore)
             bestLargeSolution = solution2;
 
-        auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
-        minLargeTime = std::min(minLargeTime, time2);
-        maxLargeTime = std::max(maxLargeTime, time2);
+        auto time2 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minLargeTime = std::min(minLargeTime, static_cast<long>(time2));
+        maxLargeTime = std::max(maxLargeTime, static_cast<long>(time2));
         totalLargeTime += time2;
 
         minLargeIter = std::min(minLargeIter, iter2);

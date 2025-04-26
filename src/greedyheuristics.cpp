@@ -72,7 +72,7 @@ Solution greedyNearestNeighbour(const std::vector<std::vector<double>> &distance
             current2 = nextPoint;
         }
     }
-
+    solution.updatePointPositions();
     return solution;
 }
 
@@ -159,30 +159,46 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
             current2 = nextPoint;
         }
     }
-
+    solution.updatePointPositions();
     return solution;
 }
 
-Solution regretCycleWeighted(const std::vector<std::vector<double>> &distanceMatrix, double weightCost = 0.0, double weightRegret = 1.0)
+Solution regretCycleWeighted(Solution solution, const std::vector<std::vector<double>> &distanceMatrix, double weightCost = 0.0, double weightRegret = 1.0)
 {
-    Solution solution;
     int n = distanceMatrix.size();
-
-    // Randomly select the starting points for the two cycles
-    int start1 = std::rand() % n;
-    int start2 = findFurthestPointIndex(distanceMatrix, start1);
-
-    // Initialize cycles with starting points
-    solution.cycleIndices[0].push_back(start1);
-    solution.cycleIndices[1].push_back(start2);
     std::vector<bool> visited(n, false);
-    visited[start1] = true;
-    visited[start2] = true;
 
+    // If we start constructing the solution from scratch
+    if (solution.cycleIndices[0].size() == 0 && solution.cycleIndices[1].size() == 0)
+    {
+        // Randomly select the starting points for the two cycles
+        int start1 = std::rand() % n;
+        int start2 = findFurthestPointIndex(distanceMatrix, start1);
+
+        // Initialize cycles with starting points
+        solution.cycleIndices[0].push_back(start1);
+        solution.cycleIndices[1].push_back(start2);
+        visited[start1] = true;
+        visited[start2] = true;
+    }
+    else
+    {
+        // Mark already added points as visited
+        for (int i = 0; i < solution.cycleIndices[0].size(); i++)
+        {
+            visited[solution.cycleIndices[0][i]] = true;
+        }
+        for (int i = 0; i < solution.cycleIndices[1].size(); i++)
+        {
+            visited[solution.cycleIndices[1][i]] = true;
+        }
+    }
+
+    int alreadyAddedCount = solution.cycleIndices[0].size() + solution.cycleIndices[1].size();
     int maxCycleSize = (n + 1) / 2;
 
     // Greedily build the cycles using regret heuristic
-    for (int i = 2; i < n; ++i)
+    for (int i = alreadyAddedCount; i < n; ++i)
     {
         int nextPoint = -1;
         int bestCycle = -1;
@@ -266,6 +282,6 @@ Solution regretCycleWeighted(const std::vector<std::vector<double>> &distanceMat
             solution.cycleIndices[1].insert(solution.cycleIndices[1].begin() + bestInsertPos, nextPoint);
         }
     }
-
+    solution.updatePointPositions();
     return solution;
 }

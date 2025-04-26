@@ -715,7 +715,7 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // 3. Large neighborhood search
         t1 = std::chrono::high_resolution_clock::now();
-        std::pair<Solution, int> result2 = largeNeighborhoodSearch(distanceMatrix, time0, points);
+        std::pair<Solution, int> result2 = largeNeighborhoodSearch(distanceMatrix, time0);
         t2 = std::chrono::high_resolution_clock::now();
 
         Solution solution2 = result2.first;

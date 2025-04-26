@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <cmath>
 #include <string>
@@ -396,7 +397,7 @@ Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &
 
     auto t1 = std::chrono::high_resolution_clock::now();
     long runtime = 0;
-    while(runtime < timeLimit)
+    while (runtime < timeLimit)
     {
         Solution tempSolution = currentSolution;
         std::uniform_int_distribution<int> choiceDist(0, 1);
@@ -468,7 +469,7 @@ Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &
 
         currentSolution = tempSolution; // Update current solution for the next iteration
         auto t2 = std::chrono::high_resolution_clock::now();
-        runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count();
+        runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
     }
     bestSolution.updatePointPositions();
     return bestSolution;

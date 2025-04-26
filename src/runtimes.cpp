@@ -85,7 +85,8 @@ void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         }
 
         // Apply regretCycle algorithm
-        Solution solution3 = regretCycleWeighted(distanceMatrix, 0.0, 1.0);
+        Solution empty;
+        Solution solution3 = regretCycleWeighted(empty, distanceMatrix, 0.0, 1.0);
         solution3.calculateScore(distanceMatrix);
         double regretCycleScore = solution3.getScore();
         minRegretCycleScore = std::min(minRegretCycleScore, regretCycleScore);
@@ -100,7 +101,7 @@ void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         }
 
         // Apply regretCycleWeighted algorithm
-        Solution solution4 = regretCycleWeighted(distanceMatrix, 1.0, 1.0);
+        Solution solution4 = regretCycleWeighted(empty, distanceMatrix, 1.0, 1.0);
         solution4.calculateScore(distanceMatrix);
         double weightedRegretCycleScore = solution4.getScore();
         minWeightedRegretCycleScore = std::min(minWeightedRegretCycleScore, weightedRegretCycleScore);
@@ -252,6 +253,7 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     long totalGreedyGreedyEdgeTime = 0.0;
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
+    Solution empty;
 
     for (int i = 0; i < iterations; ++i)
     {
@@ -259,7 +261,7 @@ void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // Generate initial random and greedy solutions
         Solution initialRandom = randomCycle(distanceMatrix);
-        Solution initialGreedy = regretCycleWeighted(distanceMatrix, 1.0, 1.0);
+        Solution initialGreedy = regretCycleWeighted(empty, distanceMatrix, 1.0, 1.0);
 
         // 0. Random Walk 1
         auto t1 = std::chrono::high_resolution_clock::now();
@@ -713,7 +715,7 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // 3. Large neighborhood search
         t1 = std::chrono::high_resolution_clock::now();
-        std::pair<Solution, int> result2 = largeNeighborhoodSearch(distanceMatrix, time0);
+        std::pair<Solution, int> result2 = largeNeighborhoodSearch(distanceMatrix, time0, points);
         t2 = std::chrono::high_resolution_clock::now();
 
         Solution solution2 = result2.first;

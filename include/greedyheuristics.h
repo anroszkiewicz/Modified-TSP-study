@@ -7,6 +7,6 @@ Solution greedyNearestNeighbour(const std::vector<std::vector<double>> &distance
 
 Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix);
 
-Solution regretCycleWeighted(const std::vector<std::vector<double>> &distanceMatrix, double weightCost, double weightRegret);
+Solution regretCycleWeighted(Solution solution, const std::vector<std::vector<double>> &distanceMatrix, double weightCost, double weightRegret);
 
 #endif

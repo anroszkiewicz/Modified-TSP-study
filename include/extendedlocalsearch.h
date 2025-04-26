@@ -6,8 +6,12 @@
 
 Solution multipleStartLocalSearch(const std::vector<std::vector<double>> &distanceMatrix);
 
-std::pair <Solution, int> iteratedLocalSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit);
+void smallPermutation(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix);
 
-std::pair <Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit);
+std::pair<Solution, int> iteratedLocalSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit);
+
+void largePermutation(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, const std::vector<Point> &points);
+
+std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit, const std::vector<Point> &points);
 
 #endif

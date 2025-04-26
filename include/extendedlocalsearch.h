@@ -10,8 +10,8 @@ void smallPermutation(Solution &solution, const std::vector<std::vector<double>>
 
 std::pair<Solution, int> iteratedLocalSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit);
 
-void largePermutation(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, const std::vector<Point> &points);
+void largePermutation(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix);
 
-std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit, const std::vector<Point> &points);
+std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit);
 
 #endif

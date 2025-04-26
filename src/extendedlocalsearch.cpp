@@ -151,12 +151,10 @@ std::pair<Solution, int> iteratedLocalSearch(const std::vector<std::vector<doubl
     return std::make_pair(bestSolution, iterations);
 }
 
-void largePermutation(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, const std::vector<Point> &points)
+void largePermutation(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix)
 {
     int totalPoints = solution.cycleIndices[0].size() + solution.cycleIndices[1].size();
     int numPoints = std::max(1, totalPoints * 30 / 200); // 30% of points, at least 1
-
-    // plotSolution(solution, points, distanceMatrix, "before");
 
     // Find random point from random cycle
     int cycle1 = std::rand() % 2;
@@ -228,14 +226,11 @@ void largePermutation(Solution &solution, const std::vector<std::vector<double>>
     solution.cycleIndices[cycle1] = newCycle1;
     solution.cycleIndices[cycle2] = newCycle2;
 
-    // plotSolution(solution, points, distanceMatrix, "after removal");
-
     // Rebuild solution using wighted regret heuristic
     solution = regretCycleWeighted(solution, distanceMatrix, 1.0, 1.0);
-    // plotSolution(solution, points, distanceMatrix, "after");
 }
 
-std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit, const std::vector<Point> &points)
+std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit)
 {
     Solution bestSolution;
     double bestScore = std::numeric_limits<double>::max();
@@ -251,7 +246,7 @@ std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<d
     {
         auto t2 = std::chrono::high_resolution_clock::now();
         runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-        largePermutation(previous, distanceMatrix, points);
+        largePermutation(previous, distanceMatrix);
         Solution current = localSearchMemory(previous, distanceMatrix);
         current.calculateScore(distanceMatrix);
         double newScore = current.score;

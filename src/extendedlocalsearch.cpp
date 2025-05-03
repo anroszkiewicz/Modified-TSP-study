@@ -79,7 +79,7 @@ void smallPermutation(Solution &solution, const std::vector<std::vector<double>>
     for (int i = 0; i < numNeighbors - 1; i++)
     {
         int leftNeighbourSegmentPoint1 = solution.cycleIndices[cycle1][(leftBoundaryPoint1 - 1 + size1) % size1];
-        int rightNeighbourSegmentPoint1 = solution.cycleIndices[cycle1][(leftBoundaryPoint1 + 1) % size1];
+        int rightNeighbourSegmentPoint1 = solution.cycleIndices[cycle1][(rightBoundaryPoint1 + 1) % size1];
         if (distanceMatrix[point2][leftNeighbourSegmentPoint1] > distanceMatrix[point2][rightNeighbourSegmentPoint1])
         {
             leftBoundaryPoint1 -= 1;
@@ -92,7 +92,7 @@ void smallPermutation(Solution &solution, const std::vector<std::vector<double>>
             rightBoundaryPoint1 %= size1;
         }
         int leftNeighbourSegmentPoint2 = solution.cycleIndices[cycle2][(leftBoundaryPoint2 - 1 + size2) % size2];
-        int rightNeighbourSegmentPoint2 = solution.cycleIndices[cycle2][(leftBoundaryPoint2 + 1) % size2];
+        int rightNeighbourSegmentPoint2 = solution.cycleIndices[cycle2][(rightBoundaryPoint2 + 1) % size2];
         if (distanceMatrix[point1][leftNeighbourSegmentPoint2] > distanceMatrix[point1][rightNeighbourSegmentPoint2])
         {
             leftBoundaryPoint2 -= 1;

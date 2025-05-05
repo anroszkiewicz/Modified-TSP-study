@@ -121,13 +121,12 @@ void smallPermutation(Solution &solution, const std::vector<std::vector<double>>
 
 std::pair<Solution, int> iteratedLocalSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit)
 {
-    Solution bestSolution;
-    double bestScore = std::numeric_limits<double>::max();
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    Solution x = randomCycle(distanceMatrix);
+    x = localSearchMemory(x, distanceMatrix);
 
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
-    Solution previous = randomCycle(distanceMatrix);
-
-    auto t1 = std::chrono::high_resolution_clock::now();
     long runtime = 0;
     int iterations = 0;
 
@@ -135,20 +134,18 @@ std::pair<Solution, int> iteratedLocalSearch(const std::vector<std::vector<doubl
     {
         auto t2 = std::chrono::high_resolution_clock::now();
         runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-        smallPermutation(previous, distanceMatrix);
-        Solution current = localSearchMemory(previous, distanceMatrix);
-        current.calculateScore(distanceMatrix);
-        double newScore = current.score;
-        if (newScore < bestScore)
-        {
-            bestSolution = current;
-            bestScore = newScore;
-        }
-        previous = current;
+
+        Solution y = x;
+        smallPermutation(y, distanceMatrix);
+        y = localSearchMemory(y, distanceMatrix);
+
+        x.calculateScore(distanceMatrix);
+        y.calculateScore(distanceMatrix);
+
+        if (y.score < x.score) x = y;
         iterations++;
     }
-
-    return std::make_pair(bestSolution, iterations);
+    return std::make_pair(x, iterations);
 }
 
 void largePermutation(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix)
@@ -230,34 +227,33 @@ void largePermutation(Solution &solution, const std::vector<std::vector<double>>
     solution = regretCycleWeighted(solution, distanceMatrix, 1.0, 1.0);
 }
 
-std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit)
+std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit, bool localSearch = true)
 {
-    Solution bestSolution;
-    double bestScore = std::numeric_limits<double>::max();
-
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
-    Solution previous = randomCycle(distanceMatrix);
-
     auto t1 = std::chrono::high_resolution_clock::now();
+
+    Solution x = randomCycle(distanceMatrix);
+    x = localSearchMemory(x, distanceMatrix);
+
     long runtime = 0;
     int iterations = 0;
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     while (runtime < timeLimit)
     {
         auto t2 = std::chrono::high_resolution_clock::now();
         runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-        largePermutation(previous, distanceMatrix);
-        Solution current = localSearchMemory(previous, distanceMatrix);
-        current.calculateScore(distanceMatrix);
-        double newScore = current.score;
-        if (newScore < bestScore)
-        {
-            bestSolution = current;
-            bestScore = newScore;
-        }
-        previous = current;
+
+        Solution y = x;
+        largePermutation(y, distanceMatrix);
+
+        if(localSearch) y = localSearchMemory(y, distanceMatrix);
+
+        x.calculateScore(distanceMatrix);
+        y.calculateScore(distanceMatrix);
+
+        if (y.score < x.score) x = y;
         iterations++;
     }
 
-    return std::make_pair(bestSolution, iterations);
+    return std::make_pair(x, iterations);
 }

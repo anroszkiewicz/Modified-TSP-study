@@ -12,6 +12,6 @@ std::pair<Solution, int> iteratedLocalSearch(const std::vector<std::vector<doubl
 
 void largePermutation(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix);
 
-std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit);
+std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit, bool localSearch);
 
 #endif

@@ -666,6 +666,18 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     int maxLargeIter = std::numeric_limits<int>::lowest();
     int totalLargeIter = 0.0;
 
+    // 4. Large neighborhood search without local search
+    double minLargeWithoutScore = std::numeric_limits<double>::max();
+    double maxLargeWithoutScore = std::numeric_limits<double>::lowest();
+    double totalLargeWithoutScore = 0.0;
+    Solution bestLargeWithoutSolution;
+    long minLargeWithoutTime = std::numeric_limits<long>::max();
+    long maxLargeWithoutTime = std::numeric_limits<long>::lowest();
+    long totalLargeWithoutTime = 0.0;
+    int minLargeWithoutIter = std::numeric_limits<int>::max();
+    int maxLargeWithoutIter = std::numeric_limits<int>::lowest();
+    int totalLargeWithoutIter = 0.0;
+
     for (int i = 0; i < iterations; ++i)
     {
         std::cout << "Progress: " << i << "/" << iterations << std::endl;
@@ -687,11 +699,14 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         minMultipleStartTime = std::min(minMultipleStartTime, static_cast<long>(time0));
         maxMultipleStartTime = std::max(maxMultipleStartTime, static_cast<long>(time0));
         totalMultipleStartTime += time0;
-
+    }
+    int timeLimit = totalMultipleStartTime / iterations;
+    for (int i = 0; i < iterations; ++i)
+    {
         // 2. Iterated local search
-        t1 = std::chrono::high_resolution_clock::now();
-        std::pair<Solution, int> result1 = iteratedLocalSearch(distanceMatrix, time0);
-        t2 = std::chrono::high_resolution_clock::now();
+        auto t1 = std::chrono::high_resolution_clock::now();
+        std::pair<Solution, int> result1 = iteratedLocalSearch(distanceMatrix, timeLimit);
+        auto t2 = std::chrono::high_resolution_clock::now();
 
         Solution solution1 = result1.first;
         int iter1 = result1.second;
@@ -715,7 +730,7 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // 3. Large neighborhood search
         t1 = std::chrono::high_resolution_clock::now();
-        std::pair<Solution, int> result2 = largeNeighborhoodSearch(distanceMatrix, time0);
+        std::pair<Solution, int> result2 = largeNeighborhoodSearch(distanceMatrix, timeLimit, true);
         t2 = std::chrono::high_resolution_clock::now();
 
         Solution solution2 = result2.first;
@@ -737,6 +752,31 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         minLargeIter = std::min(minLargeIter, iter2);
         maxLargeIter = std::max(maxLargeIter, iter2);
         totalLargeIter += iter2;
+
+        // 4. Large neighborhood search without local search
+        t1 = std::chrono::high_resolution_clock::now();
+        std::pair<Solution, int> result3 = largeNeighborhoodSearch(distanceMatrix, timeLimit, false);
+        t2 = std::chrono::high_resolution_clock::now();
+
+        Solution solution3 = result3.first;
+        int iter3 = result3.second;
+
+        solution3.calculateScore(distanceMatrix);
+        double score3 = solution3.getScore();
+        minLargeWithoutScore = std::min(minLargeWithoutScore, score3);
+        maxLargeWithoutScore = std::max(maxLargeWithoutScore, score3);
+        totalLargeWithoutScore += score3;
+        if (score3 == minLargeWithoutScore)
+            bestLargeWithoutSolution = solution3;
+
+        auto time3 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minLargeWithoutTime = std::min(minLargeWithoutTime, static_cast<long>(time3));
+        maxLargeWithoutTime = std::max(maxLargeWithoutTime, static_cast<long>(time3));
+        totalLargeWithoutTime += time3;
+
+        minLargeWithoutIter = std::min(minLargeWithoutIter, iter3);
+        maxLargeWithoutIter = std::max(maxLargeWithoutIter, iter3);
+        totalLargeWithoutIter += iter3;
     }
 
     // Print results
@@ -770,4 +810,16 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     std::cout << "Min: " << minLargeIter << " Max: " << maxLargeIter
               << " Avg: " << (totalLargeIter / iterations) << "\n";
     plotSolution(bestLargeSolution, points, distanceMatrix, "Large neighborhood search");
+
+    std::cout << "\nLarge neighborhood without local search:\n";
+    std::cout << "Results\n";
+    std::cout << "Min: " << minLargeWithoutScore << " Max: " << maxLargeWithoutScore
+              << " Avg: " << (totalLargeWithoutScore / iterations) << "\n";
+    std::cout << "Time\n";
+    std::cout << "Min: " << minLargeWithoutTime << " Max: " << maxLargeWithoutTime
+              << " Avg: " << (totalLargeWithoutTime / iterations) << "\n";
+    std::cout << "Iterations\n";
+    std::cout << "Min: " << minLargeWithoutIter << " Max: " << maxLargeWithoutIter
+              << " Avg: " << (totalLargeWithoutIter / iterations) << "\n";
+    plotSolution(bestLargeWithoutSolution, points, distanceMatrix, "Large neighborhood without local search");
 }

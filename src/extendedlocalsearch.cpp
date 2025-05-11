@@ -57,7 +57,7 @@ void smallPermutation(Solution &solution, const std::vector<std::vector<double>>
     int cycle2 = 1 - cycle1;
     int idx2 = -1;
     double maxDist = -1.0;
-    for (int i = 0; i < solution.cycleIndices[cycle2].size(); i++)
+    for (size_t i = 0; i < solution.cycleIndices[cycle2].size(); i++)
     {
         int candidate = solution.cycleIndices[cycle2][i];
         double dist = distanceMatrix[point1][candidate];
@@ -142,7 +142,8 @@ std::pair<Solution, int> iteratedLocalSearch(const std::vector<std::vector<doubl
         x.calculateScore(distanceMatrix);
         y.calculateScore(distanceMatrix);
 
-        if (y.score < x.score) x = y;
+        if (y.score < x.score)
+            x = y;
         iterations++;
     }
     return std::make_pair(x, iterations);
@@ -162,7 +163,7 @@ void largePermutation(Solution &solution, const std::vector<std::vector<double>>
     int cycle2 = 1 - cycle1;
     int idx2 = -1;
     double maxDist = -1.0;
-    for (int i = 0; i < solution.cycleIndices[cycle2].size(); i++)
+    for (size_t i = 0; i < solution.cycleIndices[cycle2].size(); i++)
     {
         int candidate = solution.cycleIndices[cycle2][i];
         double dist = distanceMatrix[point1][candidate];
@@ -179,42 +180,42 @@ void largePermutation(Solution &solution, const std::vector<std::vector<double>>
 
     // Mark points in cycle1 furthest from point2
     std::vector<std::pair<double, int>> distIdx1;
-    for (int i = 0; i < solution.cycleIndices[cycle1].size(); i++)
+    for (size_t i = 0; i < solution.cycleIndices[cycle1].size(); i++)
     {
         int p = solution.cycleIndices[cycle1][i];
         double d = distanceMatrix[point2][p];
         distIdx1.push_back({d, i});
     }
     std::sort(distIdx1.rbegin(), distIdx1.rend()); // Sort descending by distance
-    for (int i = 0; i < std::min(numPoints, (int)distIdx1.size()); i++)
+    for (size_t i = 0; i < std::min<size_t>(numPoints, distIdx1.size()); i++)
     {
         toRemoveCycle1[distIdx1[i].second] = true;
     }
 
     // Mark points in cycle2 furthest from point1
     std::vector<std::pair<double, int>> distIdx2;
-    for (int i = 0; i < solution.cycleIndices[cycle2].size(); i++)
+    for (size_t i = 0; i < solution.cycleIndices[cycle2].size(); i++)
     {
         int p = solution.cycleIndices[cycle2][i];
         double d = distanceMatrix[point1][p];
         distIdx2.push_back({d, i});
     }
     std::sort(distIdx2.rbegin(), distIdx2.rend()); // Sort descending by distance
-    for (int i = 0; i < std::min(numPoints, (int)distIdx2.size()); i++)
+    for (size_t i = 0; i < std::min<size_t>(numPoints, distIdx2.size()); i++)
     {
         toRemoveCycle2[distIdx2[i].second] = true;
     }
 
     // Create new cycles without the removed points
     std::vector<int> newCycle1;
-    for (int i = 0; i < solution.cycleIndices[cycle1].size(); i++)
+    for (size_t i = 0; i < solution.cycleIndices[cycle1].size(); i++)
     {
         if (!toRemoveCycle1[i])
             newCycle1.push_back(solution.cycleIndices[cycle1][i]);
     }
 
     std::vector<int> newCycle2;
-    for (int i = 0; i < solution.cycleIndices[cycle2].size(); i++)
+    for (size_t i = 0; i < solution.cycleIndices[cycle2].size(); i++)
     {
         if (!toRemoveCycle2[i])
             newCycle2.push_back(solution.cycleIndices[cycle2][i]);
@@ -246,12 +247,14 @@ std::pair<Solution, int> largeNeighborhoodSearch(const std::vector<std::vector<d
         Solution y = x;
         largePermutation(y, distanceMatrix);
 
-        if(localSearch) y = localSearchMemory(y, distanceMatrix);
+        if (localSearch)
+            y = localSearchMemory(y, distanceMatrix);
 
         x.calculateScore(distanceMatrix);
         y.calculateScore(distanceMatrix);
 
-        if (y.score < x.score) x = y;
+        if (y.score < x.score)
+            x = y;
         iterations++;
     }
 

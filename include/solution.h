@@ -28,6 +28,21 @@ struct Solution
     void updatePointPositions();
 
     std::pair<int, int> getPointPosition(int pointIndex) const;
+
+    bool operator<(const Solution &other) const
+    {
+        return score < other.score; // ascending
+    }
+
+    static constexpr double EPSILON = 1e-9;
+    bool operator==(const Solution &other) const
+    {
+        return std::abs(score - other.score) < EPSILON;
+    }
+    bool operator!=(const Solution &other) const
+    {
+        return !(*this == other);
+    }
 };
 
 #endif

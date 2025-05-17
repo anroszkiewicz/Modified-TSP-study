@@ -155,7 +155,6 @@ bool stepPointExchange(Solution &solution, const std::vector<std::vector<double>
 bool stepEdgeExchange(Solution &solution, const std::vector<std::vector<double>> &distanceMatrix, const std::string &strategy)
 {
     const double epsilon = 1e-6; // Avoid numerical error
-    size_t numberOfPoints = distanceMatrix.size();
     size_t pointsInCycle1 = solution.cycleIndices[0].size();
     size_t pointsInCycle2 = solution.cycleIndices[1].size();
     std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
@@ -391,9 +390,9 @@ Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &
 
     Solution currentSolution = solution;
 
-    size_t pointsInCycle1 = solution.cycleIndices[0].size();
-    size_t pointsInCycle2 = solution.cycleIndices[1].size();
-    std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
+    int pointsInCycle1 = static_cast<int>(solution.cycleIndices[0].size());
+    int pointsInCycle2 = static_cast<int>(solution.cycleIndices[1].size());
+    std::vector<int> cycleSizes = {pointsInCycle1, pointsInCycle2};
 
     auto t1 = std::chrono::high_resolution_clock::now();
     long runtime = 0;
@@ -432,7 +431,7 @@ Solution randomWalk(Solution &solution, const std::vector<std::vector<double>> &
             while (j == 0 || j == cycleSizes[c] - 1) // Ensure valid range
                 j = indexDist(gen);
 
-            size_t endIdx = (i + j) % cycleSizes[c];
+            int endIdx = (i + j) % cycleSizes[c];
 
             if (endIdx > i)
             {

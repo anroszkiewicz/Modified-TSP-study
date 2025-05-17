@@ -19,7 +19,7 @@ void enqueueImprovingVertexMoves(
     const std::vector<int> &pointsToUpdate,
     const Solution &solution,
     const std::vector<std::vector<double>> &distanceMatrix,
-    const std::vector<size_t> &cycleSizes,
+    const std::vector<int> &cycleSizes,
     std::priority_queue<Move> &pq,
     double epsilon)
 {
@@ -65,11 +65,11 @@ void enqueueImprovingEdgeMoves(
     const std::vector<Cut> &cutsToUpdate,
     const Solution &solution,
     const std::vector<std::vector<double>> &distanceMatrix,
-    const std::vector<size_t> &cycleSizes,
+    const std::vector<int> &cycleSizes,
     std::priority_queue<Move> &pq,
     double epsilon)
 {
-    for (size_t i = 0; i < cycleSizes[0]; i++)
+    for (int i = 0; i < cycleSizes[0]; i++)
     {
         for (const Cut &cut : cutsToUpdate)
         {
@@ -104,13 +104,11 @@ void enqueueImprovingEdgeMoves(
 
 Solution localSearchMemory(Solution solution, const std::vector<std::vector<double>> &distanceMatrix)
 {
-    std::priority_queue<Move> pq;
-    // Push all the legal moves to the queue
-    const double epsilon = 1e-6; // Avoid numerical errors
-    size_t numberOfPoints = distanceMatrix.size();
-    size_t pointsInCycle1 = solution.cycleIndices[0].size(); // Size of first cycle
-    size_t pointsInCycle2 = solution.cycleIndices[1].size(); // Size of second cycle
-    std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
+    std::priority_queue<Move> pq;                                           // Push all the legal moves to the queue
+    const double epsilon = 1e-6;                                            // Avoid numerical errors
+    int pointsInCycle1 = static_cast<int>(solution.cycleIndices[0].size()); // Size of first cycle
+    int pointsInCycle2 = static_cast<int>(solution.cycleIndices[1].size()); // Size of second cycle
+    std::vector<int> cycleSizes = {pointsInCycle1, pointsInCycle2};
 
     int point1;
     int point2;
@@ -120,9 +118,9 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
 
     // Add vertex swap between 2 cycles
     // For some reason it should always be a legal move
-    for (size_t i = 0; i < pointsInCycle1; ++i)
+    for (int i = 0; i < pointsInCycle1; ++i)
     {
-        for (size_t j = 0; j < pointsInCycle2; ++j)
+        for (int j = 0; j < pointsInCycle2; ++j)
         {
             delta = 0;
             // Get all the neighbours of point 1
@@ -157,9 +155,9 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
     for (size_t c = 0; c < 2; ++c)
     {
         // Loop over each pair of points in the solution
-        for (size_t i = 0; i < cycleSizes[c]; ++i)
+        for (int i = 0; i < cycleSizes[c]; ++i)
         {
-            for (size_t j = 0; j < cycleSizes[c]; ++j) // Avoid reversing whole cycle
+            for (int j = 0; j < cycleSizes[c]; ++j) // Avoid reversing whole cycle
             {
                 // Skip reversing the entire cycle
                 if (i == j || (j + 1) % cycleSizes[c] == i || (j + 2) % cycleSizes[c] == i)
@@ -167,13 +165,10 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
                     continue;
                 }
                 double delta = 0;
-                int prev1, prev2;
-                int next1, next2;
+                int prev1, next2;
                 point1 = solution.cycleIndices[c][i];
                 prev1 = solution.cycleIndices[c][(i - 1 + cycleSizes[c]) % cycleSizes[c]];
-                next1 = solution.cycleIndices[c][(i + 1) % cycleSizes[c]];
                 point2 = solution.cycleIndices[c][j];
-                prev2 = solution.cycleIndices[c][(j - 1 + cycleSizes[c]) % cycleSizes[c]];
                 next2 = solution.cycleIndices[c][(j + 1) % cycleSizes[c]];
 
                 delta -= distanceMatrix[point1][prev1];
@@ -375,11 +370,10 @@ std::vector<std::vector<int>> computeNearestneighbours(
 
 Solution localSearchCandidates(Solution solution, const std::vector<std::vector<double>> &distanceMatrix)
 {
-    const double epsilon = 1e-6; // Avoid numerical errors
-    size_t numberOfPoints = distanceMatrix.size();
-    size_t pointsInCycle1 = solution.cycleIndices[0].size(); // Size of first cycle
-    size_t pointsInCycle2 = solution.cycleIndices[1].size(); // Size of second cycle
-    std::vector<size_t> cycleSizes = {pointsInCycle1, pointsInCycle2};
+    const double epsilon = 1e-6;                                            // Avoid numerical errors
+    int pointsInCycle1 = static_cast<int>(solution.cycleIndices[0].size()); // Size of first cycle
+    int pointsInCycle2 = static_cast<int>(solution.cycleIndices[1].size()); // Size of second cycle
+    std::vector<int> cycleSizes = {pointsInCycle1, pointsInCycle2};
     int numberOfNearestPoints = 10;
 
     auto nearestneighbours = computeNearestneighbours(distanceMatrix, numberOfNearestPoints);
@@ -397,7 +391,6 @@ Solution localSearchCandidates(Solution solution, const std::vector<std::vector<
         int whichLength;
         bool sameCycle = true;
         double oldCost, newCost;
-        int prev, next;
 
         // For each cycle
         for (int c = 0; c < 2; c++)

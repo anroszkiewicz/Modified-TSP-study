@@ -87,9 +87,9 @@ void plotPoints(const std::vector<Point> &points)
 void displayDistanceMatrix(const std::vector<std::vector<double>> &distanceMatrix)
 {
     std::cout << "Distance Matrix (distances between points):\n";
-    for (int i = 0; i < distanceMatrix.size(); ++i)
+    for (size_t i = 0; i < distanceMatrix.size(); ++i)
     {
-        for (int j = 0; j < distanceMatrix[i].size(); ++j)
+        for (size_t j = 0; j < distanceMatrix[i].size(); ++j)
         {
             std::cout << distanceMatrix[i][j] << " ";
         }

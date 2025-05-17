@@ -55,7 +55,7 @@ void Solution::updatePointPositions()
 
     for (int cycle = 0; cycle < 2; ++cycle)
     {
-        for (int pos = 0; pos < cycleIndices[cycle].size(); ++pos)
+        for (int pos = 0; pos < static_cast<int>(cycleIndices[cycle].size()); ++pos)
         {
             int point = cycleIndices[cycle][pos];
             pointPositions[point] = {cycle, pos};

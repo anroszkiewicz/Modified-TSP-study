@@ -46,13 +46,13 @@ Solution greedyNearestNeighbour(const std::vector<std::vector<double>> &distance
         // Find the nearest unvisited neighbor using the distanceMatrix
         for (int j = 0; j < n; ++j)
         {
-            if (!visited[j] && distanceMatrix[current1][j] < minDistance && solution.cycleIndices[0].size() < maxCycleSize)
+            if (!visited[j] && distanceMatrix[current1][j] < minDistance && static_cast<int>(solution.cycleIndices[0].size()) < maxCycleSize)
             {
                 minDistance = distanceMatrix[current1][j];
                 nextPoint = j;
                 addToCycle = 1;
             }
-            if (!visited[j] && distanceMatrix[current2][j] < minDistance && solution.cycleIndices[1].size() < maxCycleSize)
+            if (!visited[j] && distanceMatrix[current2][j] < minDistance && static_cast<int>(solution.cycleIndices[1].size()) < maxCycleSize)
             {
                 minDistance = distanceMatrix[current2][j];
                 nextPoint = j;
@@ -92,8 +92,6 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
     visited[start1] = true;
     visited[start2] = true;
 
-    int current1 = start1;
-    int current2 = start2;
     int maxCycleSize = (n + 1) / 2;
 
     // Greedily build the cycles, inserting the best vertex at the best position
@@ -107,13 +105,13 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
         // Try to insert the new vertex in all possible positions in both cycles
         for (int j = 0; j < n; ++j)
         {
-            if (!visited[j] && solution.cycleIndices[0].size() < maxCycleSize)
+            if (!visited[j] && static_cast<int>(solution.cycleIndices[0].size()) < maxCycleSize)
             {
                 // Try inserting in cycle 1
-                for (int k = 0; k < solution.cycleIndices[0].size(); ++k)
+                for (size_t k = 0; k < solution.cycleIndices[0].size(); ++k)
                 {
                     int prev = solution.cycleIndices[0][k];
-                    int next = solution.cycleIndices[0][(k + 1) % solution.cycleIndices[0].size()];
+                    int next = solution.cycleIndices[0][(k + 1) % static_cast<int>(solution.cycleIndices[0].size())];
                     double increase = distanceMatrix[prev][j] + distanceMatrix[j][next] - distanceMatrix[prev][next];
 
                     if (increase < minIncrease)
@@ -126,13 +124,13 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
                 }
             }
 
-            if (!visited[j] && solution.cycleIndices[1].size() < maxCycleSize)
+            if (!visited[j] && static_cast<int>(solution.cycleIndices[1].size()) < maxCycleSize)
             {
                 // Try inserting in cycle 2
-                for (int k = 0; k < solution.cycleIndices[1].size(); ++k)
+                for (size_t k = 0; k < solution.cycleIndices[1].size(); ++k)
                 {
                     int prev = solution.cycleIndices[1][k];
-                    int next = solution.cycleIndices[1][(k + 1) % solution.cycleIndices[1].size()];
+                    int next = solution.cycleIndices[1][(k + 1) % static_cast<int>(solution.cycleIndices[1].size())];
                     double increase = distanceMatrix[prev][j] + distanceMatrix[j][next] - distanceMatrix[prev][next];
 
                     if (increase < minIncrease)
@@ -151,12 +149,10 @@ Solution greedyCycle(const std::vector<std::vector<double>> &distanceMatrix)
         if (addToCycle == 1)
         {
             solution.cycleIndices[0].insert(solution.cycleIndices[0].begin() + insertPosition, nextPoint);
-            current1 = nextPoint;
         }
         else
         {
             solution.cycleIndices[1].insert(solution.cycleIndices[1].begin() + insertPosition, nextPoint);
-            current2 = nextPoint;
         }
     }
     solution.updatePointPositions();
@@ -184,11 +180,11 @@ Solution regretCycleWeighted(Solution solution, const std::vector<std::vector<do
     else
     {
         // Mark already added points as visited
-        for (int i = 0; i < solution.cycleIndices[0].size(); i++)
+        for (size_t i = 0; i < solution.cycleIndices[0].size(); i++)
         {
             visited[solution.cycleIndices[0][i]] = true;
         }
-        for (int i = 0; i < solution.cycleIndices[1].size(); i++)
+        for (size_t i = 0; i < solution.cycleIndices[1].size(); i++)
         {
             visited[solution.cycleIndices[1][i]] = true;
         }
@@ -216,12 +212,12 @@ Solution regretCycleWeighted(Solution solution, const std::vector<std::vector<do
             int bestPos1 = -1, bestPos2 = -1;
 
             // Find best insertion cost for cycle 1
-            if (solution.cycleIndices[0].size() < maxCycleSize)
+            if (static_cast<int>(solution.cycleIndices[0].size()) < maxCycleSize)
             {
                 for (size_t idx = 0; idx < solution.cycleIndices[0].size(); ++idx)
                 {
                     int prev = solution.cycleIndices[0][idx];
-                    int next = solution.cycleIndices[0][(idx + 1) % solution.cycleIndices[0].size()];
+                    int next = solution.cycleIndices[0][(idx + 1) % static_cast<int>(solution.cycleIndices[0].size())];
                     double cost = distanceMatrix[prev][j] + distanceMatrix[j][next] - distanceMatrix[prev][next];
 
                     if (cost < bestCost1)
@@ -233,7 +229,7 @@ Solution regretCycleWeighted(Solution solution, const std::vector<std::vector<do
             }
 
             // Find best insertion cost for cycle 2
-            if (solution.cycleIndices[1].size() < maxCycleSize)
+            if (static_cast<int>(solution.cycleIndices[1].size()) < maxCycleSize)
             {
                 for (size_t idx = 0; idx < solution.cycleIndices[1].size(); ++idx)
                 {

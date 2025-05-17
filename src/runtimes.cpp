@@ -679,8 +679,6 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
     for (int i = 0; i < iterations; ++i)
     {
-        std::cout << "Progress: " << i << "/" << iterations << std::endl;
-
         // 1. Multiple start local search
         auto t1 = std::chrono::high_resolution_clock::now();
         Solution solution0 = multipleStartLocalSearch(distanceMatrix);
@@ -700,8 +698,10 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         totalMultipleStartTime += time0;
     }
     int timeLimit = totalMultipleStartTime / iterations;
+    std::cout << "Benchmark finished" << std::endl;
     for (int i = 0; i < iterations; ++i)
     {
+        std::cout << "Progress: " << i << "/" << iterations << std::endl;
         // 2. Iterated local search
         auto t1 = std::chrono::high_resolution_clock::now();
         std::pair<Solution, int> result1 = iteratedLocalSearch(distanceMatrix, timeLimit);
@@ -825,7 +825,7 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
 void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    int iterations = 10;
+    int iterations = 1;
 
     // 1. Multiple start local search
     double minMultipleStartScore = std::numeric_limits<double>::max();
@@ -884,10 +884,20 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     int maxEvolutionaryIter = std::numeric_limits<int>::lowest();
     int totalEvolutionaryIter = 0.0;
 
+    // 6. Hybrid evolutionary algorithm without local search
+    double minEvolutionaryWithoutScore = std::numeric_limits<double>::max();
+    double maxEvolutionaryWithoutScore = std::numeric_limits<double>::lowest();
+    double totalEvolutionaryWithoutScore = 0.0;
+    Solution bestEvolutionaryWithoutSolution;
+    long minEvolutionaryWithoutTime = std::numeric_limits<long>::max();
+    long maxEvolutionaryWithoutTime = std::numeric_limits<long>::lowest();
+    long totalEvolutionaryWithoutTime = 0.0;
+    int minEvolutionaryWithoutIter = std::numeric_limits<int>::max();
+    int maxEvolutionaryWithoutIter = std::numeric_limits<int>::lowest();
+    int totalEvolutionaryWithoutIter = 0.0;
+
     for (int i = 0; i < iterations; ++i)
     {
-        std::cout << "Progress: " << i << "/" << iterations << std::endl;
-
         // 1. Multiple start local search
         auto t1 = std::chrono::high_resolution_clock::now();
         Solution solution0 = multipleStartLocalSearch(distanceMatrix);
@@ -907,8 +917,10 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         totalMultipleStartTime += time0;
     }
     int timeLimit = totalMultipleStartTime / iterations;
+    std::cout << "Benchmark finished" << std::endl;
     for (int i = 0; i < iterations; ++i)
     {
+        std::cout << "Progress: " << i << "/" << iterations << std::endl;
         // 2. Iterated local search
         auto t1 = std::chrono::high_resolution_clock::now();
         std::pair<Solution, int> result1 = iteratedLocalSearch(distanceMatrix, timeLimit);
@@ -986,7 +998,7 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // 5. Hybrid evolutionary algorithm
         t1 = std::chrono::high_resolution_clock::now();
-        std::pair<Solution, int> result4 = evolutionaryAlgorithm(distanceMatrix, timeLimit);
+        std::pair<Solution, int> result4 = evolutionaryAlgorithm(distanceMatrix, timeLimit, true);
         t2 = std::chrono::high_resolution_clock::now();
 
         Solution solution4 = result4.first;
@@ -997,7 +1009,7 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         minEvolutionaryScore = std::min(minEvolutionaryScore, score4);
         maxEvolutionaryScore = std::max(maxEvolutionaryScore, score4);
         totalEvolutionaryScore += score4;
-        if (score3 == minEvolutionaryScore)
+        if (score4 == minEvolutionaryScore)
             bestEvolutionarySolution = solution4;
 
         auto time4 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
@@ -1008,6 +1020,31 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         minEvolutionaryIter = std::min(minEvolutionaryIter, iter4);
         maxEvolutionaryIter = std::max(maxEvolutionaryIter, iter4);
         totalEvolutionaryIter += iter4;
+
+        // 6. Hybrid evolutionary algorithm without local search
+        t1 = std::chrono::high_resolution_clock::now();
+        std::pair<Solution, int> result5 = evolutionaryAlgorithm(distanceMatrix, timeLimit, false);
+        t2 = std::chrono::high_resolution_clock::now();
+
+        Solution solution5 = result5.first;
+        int iter5 = result5.second;
+
+        solution5.calculateScore(distanceMatrix);
+        double score5 = solution5.getScore();
+        minEvolutionaryWithoutScore = std::min(minEvolutionaryWithoutScore, score5);
+        maxEvolutionaryWithoutScore = std::max(maxEvolutionaryWithoutScore, score5);
+        totalEvolutionaryWithoutScore += score5;
+        if (score5 == minEvolutionaryWithoutScore)
+            bestEvolutionaryWithoutSolution = solution5;
+
+        auto time5 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minEvolutionaryWithoutTime = std::min(minEvolutionaryWithoutTime, static_cast<long>(time5));
+        maxEvolutionaryWithoutTime = std::max(maxEvolutionaryWithoutTime, static_cast<long>(time5));
+        totalEvolutionaryWithoutTime += time5;
+
+        minEvolutionaryWithoutIter = std::min(minEvolutionaryWithoutIter, iter5);
+        maxEvolutionaryWithoutIter = std::max(maxEvolutionaryWithoutIter, iter5);
+        totalEvolutionaryWithoutIter += iter5;
     }
 
     // Print results
@@ -1065,4 +1102,16 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     std::cout << "Min: " << minEvolutionaryIter << " Max: " << maxEvolutionaryIter
               << " Avg: " << (totalEvolutionaryIter / iterations) << "\n";
     plotSolution(bestEvolutionarySolution, points, distanceMatrix, "Hybrid evolutionary algorithm");
+
+    std::cout << "\nHybrid evolutionary algorithm without local search:\n";
+    std::cout << "Results\n";
+    std::cout << "Min: " << minEvolutionaryWithoutScore << " Max: " << maxEvolutionaryWithoutScore
+              << " Avg: " << (totalEvolutionaryWithoutScore / iterations) << "\n";
+    std::cout << "Time\n";
+    std::cout << "Min: " << minEvolutionaryWithoutTime << " Max: " << maxEvolutionaryWithoutTime
+              << " Avg: " << (totalEvolutionaryWithoutTime / iterations) << "\n";
+    std::cout << "Iterations\n";
+    std::cout << "Min: " << minEvolutionaryWithoutIter << " Max: " << maxEvolutionaryWithoutIter
+              << " Avg: " << (totalEvolutionaryWithoutIter / iterations) << "\n";
+    plotSolution(bestEvolutionarySolution, points, distanceMatrix, "Hybrid evolutionary algorithm without local search");
 }

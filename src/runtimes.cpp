@@ -825,7 +825,7 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
 void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    int iterations = 1;
+    int iterations = 10;
 
     // 1. Multiple start local search
     double minMultipleStartScore = std::numeric_limits<double>::max();
@@ -1051,6 +1051,7 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     std::cout << "\nMultiple start local search:\n";
     std::cout << "Min: " << minMultipleStartScore << " Max: " << maxMultipleStartScore
               << " Avg: " << (totalMultipleStartScore / iterations) << "\n";
+    std::cout << "Time\n";
     std::cout << "Min: " << minMultipleStartTime << " Max: " << maxMultipleStartTime
               << " Avg: " << (totalMultipleStartTime / iterations) << "\n";
     plotSolution(bestMultipleStartSolution, points, distanceMatrix, "Multiple start local search");
@@ -1113,5 +1114,5 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     std::cout << "Iterations\n";
     std::cout << "Min: " << minEvolutionaryWithoutIter << " Max: " << maxEvolutionaryWithoutIter
               << " Avg: " << (totalEvolutionaryWithoutIter / iterations) << "\n";
-    plotSolution(bestEvolutionarySolution, points, distanceMatrix, "Hybrid evolutionary algorithm without local search");
+    plotSolution(bestEvolutionaryWithoutSolution, points, distanceMatrix, "Hybrid evolutionary algorithm without local search");
 }

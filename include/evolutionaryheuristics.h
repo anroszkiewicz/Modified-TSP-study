@@ -4,6 +4,10 @@
 #include <vector>
 #include <utility>
 
-std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit);
+bool insertIntoPopulation(std::vector<Solution> &population, const Solution &child);
+
+Solution crossover(const Solution &parent1, const Solution &parent2, const std::vector<std::vector<double>> &distanceMatrix);
+
+std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit, bool localSearch);
 
 #endif

@@ -278,7 +278,7 @@ Solution crossover(const Solution &parent1, const Solution &parent2, const std::
         child.cycleIndices[fromCycle].erase(child.cycleIndices[fromCycle].begin() + bestFromIndex);
         child.cycleIndices[toCycle].insert(child.cycleIndices[toCycle].begin() + bestToIndex, pointToMove);
     }
-
+    child.updatePointPositions();
     return child;
 }
 
@@ -317,11 +317,15 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
         Solution parent2 = population[idx2];
         Solution child = crossover(parent1, parent2, distanceMatrix);
 
+        // plotSolution(child, points, distanceMatrix, "Child");
+
         // Optional local search
         if (localSearch)
         {
             child = localSearchMemory(child, distanceMatrix);
+            // plotSolution(child, points, distanceMatrix, "Child after LS");
         }
+
         child.calculateScore(distanceMatrix);
         insertIntoPopulation(population, child);
         iterations++;

@@ -294,14 +294,14 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
         x.calculateScore(distanceMatrix);
         insertIntoPopulation(population, x);
     }
-
-    long runtime = 0;
+    auto t2 = std::chrono::high_resolution_clock::now();
+    long runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
     int iterations = 0;
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     while (runtime < timeLimit)
     {
-        auto t2 = std::chrono::high_resolution_clock::now();
+        t2 = std::chrono::high_resolution_clock::now();
         runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
         // Select two distinct parents uniformly at random

@@ -14,4 +14,8 @@ void lab4(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
 void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix);
 
+void lab5_heuristic(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix);
+
+void lab5_evolutionary(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix);
+
 #endif

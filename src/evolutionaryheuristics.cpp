@@ -282,6 +282,87 @@ Solution crossover(const Solution &parent1, const Solution &parent2, const std::
     return child;
 }
 
+Solution proposed_crossover(const Solution &parent1, const Solution &parent2, const std::vector<std::vector<double>> &distanceMatrix)
+{
+    // choose parent at random
+    int which_parent = std::rand() % 2;
+    Solution solution;
+    Solution other;
+    
+    if(which_parent == 0)
+    {
+        solution = parent1;
+        other = parent2;
+    }
+    else
+    {
+        solution = parent2;
+        other = parent1;
+    }
+
+    // Delete edges are not present in the other parent
+    std::vector<bool> toRemoveCycle1(solution.cycleIndices[0].size(), false);
+    std::vector<bool> toRemoveCycle2(solution.cycleIndices[1].size(), false);
+
+    for (size_t i = 1; i < solution.cycleIndices[0].size(); i++)
+    {
+        std::vector<int> sequence = {i-1, i};
+        auto it = std::search(other.cycleIndices[0].begin(), other.cycleIndices[0].end(), sequence.begin(), sequence.end());
+
+        if (it == other.cycleIndices[0].end())
+        {
+            toRemoveCycle1[i-1] = true;
+            toRemoveCycle1[i] = true;
+        }
+
+        it = std::search(other.cycleIndices[1].begin(), other.cycleIndices[1].end(), sequence.begin(), sequence.end());
+        if (it == other.cycleIndices[1].end())
+        {
+            toRemoveCycle1[i-1] = true;
+            toRemoveCycle1[i] = true;
+        }
+    }
+
+    for (size_t i = 1; i < solution.cycleIndices[1].size(); i++)
+    {
+        std::vector<int> sequence = {i-1, i};
+        auto it = std::search(other.cycleIndices[0].begin(), other.cycleIndices[0].end(), sequence.begin(), sequence.end());
+        if (it == other.cycleIndices[0].end())
+        {
+            toRemoveCycle2[i-1] = true;
+            toRemoveCycle2[i] = true;
+        }
+
+        it = std::search(other.cycleIndices[1].begin(), other.cycleIndices[1].end(), sequence.begin(), sequence.end());
+        if (it == other.cycleIndices[1].end())
+        {
+            toRemoveCycle2[i-1] = true;
+            toRemoveCycle2[i] = true;
+        }
+    }
+
+    // Create new cycles without the removed points
+    std::vector<int> newCycle1;
+    for (size_t i = 0; i < solution.cycleIndices[0].size(); i++)
+    {
+        if (!toRemoveCycle1[i])
+            newCycle1.push_back(solution.cycleIndices[0][i]);
+    }
+
+    std::vector<int> newCycle2;
+    for (size_t i = 0; i < solution.cycleIndices[1].size(); i++)
+    {
+        if (!toRemoveCycle2[i])
+            newCycle2.push_back(solution.cycleIndices[1][i]);
+    }
+
+    solution.cycleIndices[0] = newCycle1;
+    solution.cycleIndices[1] = newCycle2;
+
+    // Rebuild solution using wighted regret heuristic
+    return regretCycleWeighted(solution, distanceMatrix, 1.0, 1.0);
+}
+
 std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<double>> &distanceMatrix, int timeLimit, bool localSearch)
 {
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -311,11 +392,14 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
         {
             idx2 = std::rand() % POPULATION_SIZE;
         } while (idx1 == idx2);
+        std::cout<<"selected parents"<<std::endl;
 
         // Crossover
         Solution parent1 = population[idx1];
         Solution parent2 = population[idx2];
-        Solution child = crossover(parent1, parent2, distanceMatrix);
+        Solution child = proposed_crossover(parent1, parent2, distanceMatrix);
+        //Solution child;
+        std::cout<<"did crossover"<<std::endl;
 
         // plotSolution(child, points, distanceMatrix, "Child");
 
@@ -325,11 +409,15 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
             child = localSearchMemory(child, distanceMatrix);
             // plotSolution(child, points, distanceMatrix, "Child after LS");
         }
+        std::cout<<"did localsearch"<<std::endl;
 
         child.calculateScore(distanceMatrix);
         insertIntoPopulation(population, child);
+        std::cout<<"inserted child"<<std::endl;
         iterations++;
     }
+    std::cout<<iterations<<std::endl;
+    std::cout<<runtime<<std::endl;
 
     return std::make_pair(population.front(), iterations);
 }

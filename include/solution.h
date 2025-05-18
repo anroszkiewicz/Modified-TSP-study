@@ -2,6 +2,7 @@
 #define SOLUTION_H
 
 #include <vector>
+#include <cmath>
 
 struct Solution
 {
@@ -37,7 +38,7 @@ struct Solution
     static constexpr double EPSILON = 1e-9;
     bool operator==(const Solution &other) const
     {
-        return std::abs(score - other.score) < EPSILON;
+        return abs(score - other.score) < EPSILON;
     }
     bool operator!=(const Solution &other) const
     {

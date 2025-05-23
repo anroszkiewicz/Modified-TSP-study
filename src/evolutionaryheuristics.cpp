@@ -282,7 +282,7 @@ Solution crossover(const Solution &parent1, const Solution &parent2, const std::
     return child;
 }
 
-Solution proposed_crossover(const Solution &parent1, const Solution &parent2, const std::vector<std::vector<double>> &distanceMatrix)
+Solution proposedCrossover(const Solution &parent1, const Solution &parent2, const std::vector<std::vector<double>> &distanceMatrix)
 {
     // choose parent at random
     int which_parent = std::rand() % 2;
@@ -397,7 +397,7 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
         // Crossover
         Solution parent1 = population[idx1];
         Solution parent2 = population[idx2];
-        Solution child = proposed_crossover(parent1, parent2, distanceMatrix);
+        Solution child = proposedCrossover(parent1, parent2, distanceMatrix);
         // Solution child;
         std::cout << "did crossover" << std::endl;
 

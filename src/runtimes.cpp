@@ -21,6 +21,7 @@
 #include "extendedlocalsearch.h"
 #include "evolutionaryheuristics.h"
 #include "freestyle.h"
+#include "convextest.h"
 
 void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
@@ -1341,4 +1342,30 @@ void lab6(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     std::cout << "Min: " << minIter << " Max: " << maxIter
               << " Avg: " << (totalIter / iterations) << "\n";
     plotSolution(bestSolution, points, distanceMatrix, "Freestyle");
+}
+
+void convex_test_runtime(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
+{
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+    // generate one good solution
+    int timeLimit = 5608;
+    //int timeLimit = 6548;
+
+    std::pair<Solution, int> result = freestyle(distanceMatrix, timeLimit);
+    Solution goodSolution = result.first;
+
+    // generate 1000 local optima
+    std::vector <Solution> solutions;
+    for(int i=0; i<1000; i++)
+    {
+        Solution initialRandom = randomCycle(distanceMatrix);
+        Solution localOptimum = localSearchEdges(initialRandom, distanceMatrix, "greedy");
+        localOptimum.calculateScore(distanceMatrix);
+        solutions.push_back(localOptimum);
+    }
+
+    // perform tests
+    convex_test(goodSolution, solutions, distanceMatrix, "vertices");
+    convex_test(goodSolution, solutions, distanceMatrix, "edges");
 }

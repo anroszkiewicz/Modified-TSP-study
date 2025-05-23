@@ -23,12 +23,106 @@
 
 int common_vertices_metric(Solution &a, Solution &b)
 {
-    return 0;
+    int count = 0;
+    for (size_t i=0; i<a.cycleIndices[0].size(); ++i)
+    {
+        if (std::find(b.cycleIndices[0].begin(), b.cycleIndices[0].end(), a.cycleIndices[0][i]) != b.cycleIndices[0].end())
+        {
+            count++;
+        }
+    }
+    for (size_t i=0; i<a.cycleIndices[1].size(); ++i)
+    {
+        if (std::find(b.cycleIndices[1].begin(), b.cycleIndices[1].end(), a.cycleIndices[1][i]) != b.cycleIndices[1].end())
+        {
+            count++;
+        }
+    }
+
+    int count_swapped_cycles = 0;
+    for (size_t i=0; i<a.cycleIndices[0].size(); ++i)
+    {
+        if (std::find(b.cycleIndices[1].begin(), b.cycleIndices[1].end(), a.cycleIndices[0][i]) != b.cycleIndices[1].end())
+        {
+            count_swapped_cycles++;
+        }
+    }
+    for (size_t i=0; i<a.cycleIndices[1].size(); ++i)
+    {
+        if (std::find(b.cycleIndices[0].begin(), b.cycleIndices[0].end(), a.cycleIndices[1][i]) != b.cycleIndices[0].end())
+        {
+            count_swapped_cycles++;
+        }
+    }
+    return std::max(count, count_swapped_cycles);
 }
 
 int common_edges_metric(Solution &a, Solution &b)
 {
-    return 0;
+    int count = 0;
+    for (size_t i = 1; i < a.cycleIndices[0].size(); i++)
+    {
+        std::vector<int> sequence = {i-1, i};
+        auto it = std::search(b.cycleIndices[0].begin(), b.cycleIndices[0].end(), sequence.begin(), sequence.end());
+        if (it != b.cycleIndices[0].end()) count++;
+
+        // check reversed edge
+        sequence = {i, i-1};
+        it = std::search(b.cycleIndices[0].begin(), b.cycleIndices[0].end(), sequence.begin(), sequence.end());
+        if (it != b.cycleIndices[0].end()) count++;
+
+        // check first and last element
+        if (i-1 == b.cycleIndices[0][0] && i == b.cycleIndices[0][99]) count++;
+        if (i == b.cycleIndices[0][0] && i-1 == b.cycleIndices[0][99]) count++;
+    }
+    for (size_t i = 1; i < a.cycleIndices[1].size(); i++)
+    {
+        std::vector<int> sequence = {i-1, i};
+        auto it = std::search(b.cycleIndices[1].begin(), b.cycleIndices[1].end(), sequence.begin(), sequence.end());
+        if (it != b.cycleIndices[1].end()) count++;
+
+        // check reversed edge
+        sequence = {i, i-1};
+        it = std::search(b.cycleIndices[1].begin(), b.cycleIndices[1].end(), sequence.begin(), sequence.end());
+        if (it != b.cycleIndices[1].end()) count++;
+
+        // check first and last element
+        if (i-1 == b.cycleIndices[1][0] && i == b.cycleIndices[1][99]) count++;
+        if (i == b.cycleIndices[1][0] && i-1 == b.cycleIndices[1][99]) count++;
+    }
+
+    int count_swapped_cycles = 0;
+    for (size_t i = 1; i < a.cycleIndices[0].size(); i++)
+    {
+        std::vector<int> sequence = {i-1, i};
+        auto it = std::search(b.cycleIndices[1].begin(), b.cycleIndices[1].end(), sequence.begin(), sequence.end());
+        if (it != b.cycleIndices[1].end()) count++;
+
+        // check reversed edge
+        sequence = {i, i-1};
+        it = std::search(b.cycleIndices[1].begin(), b.cycleIndices[1].end(), sequence.begin(), sequence.end());
+        if (it != b.cycleIndices[1].end()) count++;
+
+        // check first and last element
+        if (i-1 == b.cycleIndices[1][0] && i == b.cycleIndices[1][99]) count++;
+        if (i == b.cycleIndices[1][0] && i-1 == b.cycleIndices[1][99]) count++;
+    }
+    for (size_t i = 1; i < a.cycleIndices[1].size(); i++)
+    {
+        std::vector<int> sequence = {i-1, i};
+        auto it = std::search(b.cycleIndices[0].begin(), b.cycleIndices[0].end(), sequence.begin(), sequence.end());
+        if (it != b.cycleIndices[0].end()) count++;
+
+        // check reversed edge
+        sequence = {i, i-1};
+        it = std::search(b.cycleIndices[0].begin(), b.cycleIndices[0].end(), sequence.begin(), sequence.end());
+        if (it != b.cycleIndices[0].end()) count++;
+
+        // check first and last element
+        if (i-1 == b.cycleIndices[0][0] && i == b.cycleIndices[0][99]) count++;
+        if (i == b.cycleIndices[0][0] && i-1 == b.cycleIndices[0][99]) count++;
+    }
+    return std::max(count, count_swapped_cycles);
 }
 
 void convex_test(Solution &goodSolution, std::vector<Solution> &solutions, const std::vector<std::vector<double>> &distanceMatrix, std::string metric="vertices")

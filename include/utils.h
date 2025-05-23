@@ -15,4 +15,6 @@ void displayDistanceMatrix(const std::vector<std::vector<double>> &distanceMatri
 
 void plotSolution(Solution &solution, const std::vector<Point> &points, const std::vector<std::vector<double>> &distanceMatrix, const std::string &title);
 
+void plotSimilarity(std::vector<Solution> &solutions, std::vector<double> &similarities, const std::vector<std::vector<double>> &distanceMatrix, const std::string &title);
+
 #endif

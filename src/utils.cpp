@@ -155,3 +155,18 @@ void plotSolution(Solution &solution, const std::vector<Point> &points, const st
     // Show plot
     plt::show();
 }
+
+void plotSimilarity(std::vector<Solution> &solutions, std::vector<double> &similarities, const std::vector<std::vector<double>> &distanceMatrix, const std::string &title)
+{
+    // Calculate distances
+    std::vector <double> scores;
+    for (int i = 0; i < static_cast<int>(solutions.size()); ++i)
+    {
+        scores.push_back(solutions[i].getScore());
+    }
+
+    // Draw plot
+    plt::plot(scores, similarities);
+    plt::title(title);
+    plt::show();
+}

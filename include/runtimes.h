@@ -18,4 +18,6 @@ void lab5_heuristic(std::vector<Point> &points, std::vector<std::vector<double>>
 
 void lab5_evolutionary(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix);
 
+void convex_test_runtime(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix);
+
 #endif

@@ -392,28 +392,19 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
         {
             idx2 = std::rand() % POPULATION_SIZE;
         } while (idx1 == idx2);
-        std::cout << "selected parents" << std::endl;
 
         // Crossover
         Solution parent1 = population[idx1];
         Solution parent2 = population[idx2];
         Solution child = proposedCrossover(parent1, parent2, distanceMatrix);
-        // Solution child;
-        std::cout << "did crossover" << std::endl;
-
-        // plotSolution(child, points, distanceMatrix, "Child");
 
         // Optional local search
         if (localSearch)
         {
             child = localSearchMemory(child, distanceMatrix);
-            // plotSolution(child, points, distanceMatrix, "Child after LS");
         }
-        std::cout << "did localsearch" << std::endl;
-
         child.calculateScore(distanceMatrix);
         insertIntoPopulation(population, child);
-        std::cout << "inserted child" << std::endl;
         iterations++;
     }
     std::cout << iterations << std::endl;

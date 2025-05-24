@@ -4,7 +4,7 @@
 #include <vector>
 #include <utility>
 
-bool insertIntoPopulation(std::vector<Solution> &population, const Solution &child);
+bool insertIntoPopulation(std::vector<Solution> &population, const Solution &child, size_t MAX_POPULATION_SIZE);
 
 Solution crossover(const Solution &parent1, const Solution &parent2, const std::vector<std::vector<double>> &distanceMatrix);
 

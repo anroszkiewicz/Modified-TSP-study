@@ -32,6 +32,7 @@ std::pair<Solution, int> freestyle(const std::vector<std::vector<double>> &dista
     std::random_device rd;
     std::mt19937 rng(rd());
     std::uniform_int_distribution<int> dist(0, 3); // 4 choices: 0-3
+    std::uniform_int_distribution<int> localSearchDist(0, 1);
     while (population.size() < POPULATION_SIZE)
     {
         Solution x;
@@ -54,10 +55,19 @@ std::pair<Solution, int> freestyle(const std::vector<std::vector<double>> &dista
             break;
         }
         }
-        x = localSearchMemory(x, distanceMatrix);
+        int localSearchMethod = localSearchDist(rng);
+        if (localSearchMethod == 0)
+        {
+            x = localSearchMemory(x, distanceMatrix);
+        }
+        else
+        {
+            std::uniform_int_distribution<int> nhSizeDist(1, distanceMatrix.size() / 2 - 2);
+            int neighbourhoodSize = nhSizeDist(rng);
+            x = localSearchCandidates(x, distanceMatrix, neighbourhoodSize);
+        }
         x.calculateScore(distanceMatrix);
-        insertIntoPopulation(population, x);
-        std::cout << "Population size " << population.size() << std::endl;
+        insertIntoPopulation(population, x, POPULATION_SIZE);
     }
     auto t2 = std::chrono::high_resolution_clock::now();
     long runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
@@ -82,9 +92,19 @@ std::pair<Solution, int> freestyle(const std::vector<std::vector<double>> &dista
         Solution parent2 = population[idx2];
         Solution child = crossover(parent1, parent2, distanceMatrix);
 
-        child = localSearchMemory(child, distanceMatrix);
+        int localSearchMethod = localSearchDist(rng);
+        if (localSearchMethod == 0)
+        {
+            child = localSearchMemory(child, distanceMatrix);
+        }
+        else
+        {
+            std::uniform_int_distribution<int> nhSizeDist(1, distanceMatrix.size() / 2 - 2);
+            int neighbourhoodSize = nhSizeDist(rng);
+            child = localSearchCandidates(child, distanceMatrix, neighbourhoodSize);
+        }
         child.calculateScore(distanceMatrix);
-        insertIntoPopulation(population, child);
+        insertIntoPopulation(population, child, POPULATION_SIZE);
         iterations++;
     }
     std::cout << "Iterations " << iterations << std::endl;

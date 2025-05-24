@@ -23,7 +23,7 @@
 
 #define POPULATION_SIZE 20
 
-bool insertIntoPopulation(std::vector<Solution> &population, const Solution &child)
+bool insertIntoPopulation(std::vector<Solution> &population, const Solution &child, size_t MAX_POPULATION_SIZE = 10)
 {
     if (population.empty())
     {
@@ -35,7 +35,7 @@ bool insertIntoPopulation(std::vector<Solution> &population, const Solution &chi
     size_t pos = std::distance(population.begin(), it);
 
     // Too weak to be included
-    if (pos == population.size())
+    if (pos == MAX_POPULATION_SIZE)
         return false;
 
     if (pos == 0)
@@ -43,7 +43,7 @@ bool insertIntoPopulation(std::vector<Solution> &population, const Solution &chi
         if (child != population[0])
         {
             population.insert(it, child);
-            if (population.size() > POPULATION_SIZE)
+            if (population.size() > MAX_POPULATION_SIZE)
                 population.pop_back();
             return true;
         }
@@ -60,7 +60,7 @@ bool insertIntoPopulation(std::vector<Solution> &population, const Solution &chi
         if (diffPrev && diffNext)
         {
             population.insert(it, child);
-            if (population.size() > POPULATION_SIZE)
+            if (population.size() > MAX_POPULATION_SIZE)
                 population.pop_back();
             return true;
         }
@@ -373,7 +373,7 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
         Solution x = randomCycle(distanceMatrix);
         x = localSearchMemory(x, distanceMatrix);
         x.calculateScore(distanceMatrix);
-        insertIntoPopulation(population, x);
+        insertIntoPopulation(population, x, POPULATION_SIZE);
     }
     auto t2 = std::chrono::high_resolution_clock::now();
     long runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
@@ -404,7 +404,7 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
             child = localSearchMemory(child, distanceMatrix);
         }
         child.calculateScore(distanceMatrix);
-        insertIntoPopulation(population, child);
+        insertIntoPopulation(population, child, POPULATION_SIZE);
         iterations++;
     }
     std::cout << iterations << std::endl;

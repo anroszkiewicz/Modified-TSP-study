@@ -32,7 +32,7 @@ std::pair<Solution, int> freestyle(const std::vector<std::vector<double>> &dista
     std::random_device rd;
     std::mt19937 rng(rd());
     std::uniform_int_distribution<int> dist(0, 3); // 4 choices: 0-3
-    std::uniform_int_distribution<int> localSearchDist(0, 1);
+    std::uniform_int_distribution<int> localSearchWeightDist(1, 100);
     while (population.size() < POPULATION_SIZE)
     {
         Solution x;
@@ -55,8 +55,8 @@ std::pair<Solution, int> freestyle(const std::vector<std::vector<double>> &dista
             break;
         }
         }
-        int localSearchMethod = localSearchDist(rng);
-        if (localSearchMethod == 0)
+        int roll = localSearchWeightDist(rng);
+        if (roll <= 90)
         {
             x = localSearchMemory(x, distanceMatrix);
         }
@@ -92,8 +92,8 @@ std::pair<Solution, int> freestyle(const std::vector<std::vector<double>> &dista
         Solution parent2 = population[idx2];
         Solution child = crossover(parent1, parent2, distanceMatrix);
 
-        int localSearchMethod = localSearchDist(rng);
-        if (localSearchMethod == 0)
+        int roll = localSearchWeightDist(rng);
+        if (roll <= 90)
         {
             child = localSearchMemory(child, distanceMatrix);
         }

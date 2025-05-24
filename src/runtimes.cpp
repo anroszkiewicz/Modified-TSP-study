@@ -589,7 +589,7 @@ void lab3(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
         // 2. Random + Steepest Descent + Candidate Moves
         t1 = std::chrono::high_resolution_clock::now();
-        Solution solution2 = localSearchCandidates(initialRandom, distanceMatrix);
+        Solution solution2 = localSearchCandidates(initialRandom, distanceMatrix, 1);
         t2 = std::chrono::high_resolution_clock::now();
 
         solution2.calculateScore(distanceMatrix);

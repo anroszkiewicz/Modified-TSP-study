@@ -368,11 +368,12 @@ std::vector<std::vector<int>> computeNearestneighbours(
     return nearestneighbours;
 }
 
-Solution localSearchCandidates(Solution solution, const std::vector<std::vector<double>> &distanceMatrix)
+Solution localSearchCandidates(Solution solution, const std::vector<std::vector<double>> &distanceMatrix, int neighbourhoodSize)
 {
     const double epsilon = 1e-6;                                            // Avoid numerical errors
     int pointsInCycle1 = static_cast<int>(solution.cycleIndices[0].size()); // Size of first cycle
     int pointsInCycle2 = static_cast<int>(solution.cycleIndices[1].size()); // Size of second cycle
+    neighbourhoodSize = std::max(1, std::min(neighbourhoodSize, std::min(pointsInCycle1, pointsInCycle2) - 2));
     std::vector<int> cycleSizes = {pointsInCycle1, pointsInCycle2};
     int numberOfNearestPoints = 10;
 
@@ -450,7 +451,7 @@ Solution localSearchCandidates(Solution solution, const std::vector<std::vector<
                             for (const int sideOther : sidesOther)
                             {
                                 // Check all possible lengths
-                                for (int l = 1; l <= 1; l++)
+                                for (int l = 1; l <= neighbourCycle; l++)
                                 {
                                     int indexRemoved1 = (i + side * l + cycleSizes[c]) % cycleSizes[c];
                                     int pointRemoved1 = solution.cycleIndices[c][indexRemoved1];

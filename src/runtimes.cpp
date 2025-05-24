@@ -20,6 +20,7 @@
 #include "optimization.h"
 #include "extendedlocalsearch.h"
 #include "evolutionaryheuristics.h"
+#include "freestyle.h"
 
 void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
@@ -917,7 +918,7 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
         totalMultipleStartTime += time0;
     }
     int timeLimit = totalMultipleStartTime / iterations;
-    std::cout << "Benchmark finished" << std::endl;
+    std::cout << "Benchmark finished, timelimit: " << timeLimit << std::endl;
     for (int i = 0; i < iterations; ++i)
     {
         std::cout << "Progress: " << i << "/" << iterations << std::endl;
@@ -1119,7 +1120,7 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
 void lab5_heuristic(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    //int timeLimit = 5608;
+    // int timeLimit = 5608;
     int timeLimit = 6548;
 
     double minWeightedRegretCycleScore = std::numeric_limits<double>::max();
@@ -1164,7 +1165,7 @@ void lab5_heuristic(std::vector<Point> &points, std::vector<std::vector<double>>
 void lab5_evolutionary(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
     int timeLimit = 5608;
-    //int timeLimit = 6548;
+    // int timeLimit = 6548;
 
     int iterations = 10;
 
@@ -1205,7 +1206,7 @@ void lab5_evolutionary(std::vector<Point> &points, std::vector<std::vector<doubl
         Solution solution4 = result4.first;
         int iter4 = result4.second;
 
-        if(iter4 == 1)
+        if (iter4 == 1)
         {
             discarded1++;
         }
@@ -1237,7 +1238,7 @@ void lab5_evolutionary(std::vector<Point> &points, std::vector<std::vector<doubl
         Solution solution5 = result5.first;
         int iter5 = result5.second;
 
-        if(iter5 == 1)
+        if (iter5 == 1)
         {
             discarded2++;
         }
@@ -1265,24 +1266,79 @@ void lab5_evolutionary(std::vector<Point> &points, std::vector<std::vector<doubl
     std::cout << "\nHybrid evolutionary algorithm:\n";
     std::cout << "Results\n";
     std::cout << "Min: " << minEvolutionaryScore << " Max: " << maxEvolutionaryScore
-              << " Avg: " << (totalEvolutionaryScore / (iterations-discarded1)) << "\n";
+              << " Avg: " << (totalEvolutionaryScore / (iterations - discarded1)) << "\n";
     std::cout << "Time\n";
     std::cout << "Min: " << minEvolutionaryTime << " Max: " << maxEvolutionaryTime
-              << " Avg: " << (totalEvolutionaryTime / (iterations-discarded1)) << "\n";
+              << " Avg: " << (totalEvolutionaryTime / (iterations - discarded1)) << "\n";
     std::cout << "Iterations\n";
     std::cout << "Min: " << minEvolutionaryIter << " Max: " << maxEvolutionaryIter
-              << " Avg: " << (totalEvolutionaryIter / (iterations-discarded1)) << "\n";
+              << " Avg: " << (totalEvolutionaryIter / (iterations - discarded1)) << "\n";
     plotSolution(bestEvolutionarySolution, points, distanceMatrix, "Hybrid evolutionary algorithm");
 
     std::cout << "\nHybrid evolutionary algorithm without local search:\n";
     std::cout << "Results\n";
     std::cout << "Min: " << minEvolutionaryWithoutScore << " Max: " << maxEvolutionaryWithoutScore
-              << " Avg: " << (totalEvolutionaryWithoutScore / (iterations-discarded2)) << "\n";
+              << " Avg: " << (totalEvolutionaryWithoutScore / (iterations - discarded2)) << "\n";
     std::cout << "Time\n";
     std::cout << "Min: " << minEvolutionaryWithoutTime << " Max: " << maxEvolutionaryWithoutTime
-              << " Avg: " << (totalEvolutionaryWithoutTime / (iterations-discarded2)) << "\n";
+              << " Avg: " << (totalEvolutionaryWithoutTime / (iterations - discarded2)) << "\n";
     std::cout << "Iterations\n";
     std::cout << "Min: " << minEvolutionaryWithoutIter << " Max: " << maxEvolutionaryWithoutIter
-              << " Avg: " << (totalEvolutionaryWithoutIter / (iterations-discarded2)) << "\n";
+              << " Avg: " << (totalEvolutionaryWithoutIter / (iterations - discarded2)) << "\n";
     plotSolution(bestEvolutionaryWithoutSolution, points, distanceMatrix, "Hybrid evolutionary algorithm without local search");
+}
+
+void lab6(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
+{
+    int timeLimit = 16174;
+
+    int iterations = 10;
+
+    double minScore = std::numeric_limits<double>::max();
+    double maxScore = std::numeric_limits<double>::lowest();
+    double totalScore = 0.0;
+    Solution bestSolution;
+    long minTime = std::numeric_limits<long>::max();
+    long maxTime = std::numeric_limits<long>::lowest();
+    long totalTime = 0.0;
+    int minIter = std::numeric_limits<int>::max();
+    int maxIter = std::numeric_limits<int>::lowest();
+    int totalIter = 0;
+
+    for (int i = 0; i < iterations; ++i)
+    {
+        std::cout << "Progress: " << i << "/" << iterations << std::endl;
+        auto t1 = std::chrono::high_resolution_clock::now();
+        auto [solution, iter] = freestyle(distanceMatrix, timeLimit);
+        auto t2 = std::chrono::high_resolution_clock::now();
+
+        solution.calculateScore(distanceMatrix);
+        double score = solution.getScore();
+        minScore = std::min(minScore, score);
+        maxScore = std::max(maxScore, score);
+        totalScore += score;
+        if (score == minScore)
+            bestSolution = solution;
+
+        auto time = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        minTime = std::min(minTime, static_cast<long>(time));
+        maxTime = std::max(maxTime, static_cast<long>(time));
+        totalTime += time;
+
+        minIter = std::min(minIter, iter);
+        maxIter = std::max(maxIter, iter);
+        totalIter += iter;
+    }
+
+    std::cout << "\nFreestyle:\n";
+    std::cout << "Results\n";
+    std::cout << "Min: " << minScore << " Max: " << maxScore
+              << " Avg: " << (totalScore / iterations) << "\n";
+    std::cout << "Time\n";
+    std::cout << "Min: " << minTime << " Max: " << maxTime
+              << " Avg: " << (totalTime / iterations) << "\n";
+    std::cout << "Iterations\n";
+    std::cout << "Min: " << minIter << " Max: " << maxIter
+              << " Avg: " << (totalIter / iterations) << "\n";
+    plotSolution(bestSolution, points, distanceMatrix, "Freestyle");
 }

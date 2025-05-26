@@ -67,11 +67,22 @@ bool stepPointExchange(Solution &solution, const std::vector<std::vector<double>
     int cycleOfPoint1;
     int cycleOfPoint2;
 
-    // Loop over each pair of points in the solution
-    for (size_t i = 0; i < numberOfPoints; ++i)
+    // Create and shuffle the index vector
+    std::vector<size_t> indices(numberOfPoints);
+    std::iota(indices.begin(), indices.end(), 0); // Fill with 0, 1, ..., numberOfPoints - 1
+
+    // Random number generator for shuffling
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::shuffle(indices.begin(), indices.end(), rng);
+
+    // Iterate using the shuffled indices
+    for (size_t a = 0; a < numberOfPoints; ++a)
     {
-        for (size_t j = i + 1; j < numberOfPoints; ++j)
+        size_t i = indices[a];
+        for (size_t b = a + 1; b < numberOfPoints; ++b)
         {
+            size_t j = indices[b];
             // Calculate to which cycle these point belong to
             // Example 13/50 = 0 (integer division) so it is the 1st cycle
             // Example 63/50 = 1 (integer division) so it is the 2nd cycle
@@ -173,9 +184,23 @@ bool stepEdgeExchange(Solution &solution, const std::vector<std::vector<double>>
     Move bestMove;
     // Add vertex swap between 2 cycles
     // For some reason it should always be a legal move
-    for (size_t i = 0; i < pointsInCycle1; ++i)
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+
+    // Shuffle indices for cycle 1
+    std::vector<size_t> indices1(pointsInCycle1);
+    std::iota(indices1.begin(), indices1.end(), 0);
+    std::shuffle(indices1.begin(), indices1.end(), rng);
+
+    // Shuffle indices for cycle 2
+    std::vector<size_t> indices2(pointsInCycle2);
+    std::iota(indices2.begin(), indices2.end(), 0);
+    std::shuffle(indices2.begin(), indices2.end(), rng);
+
+    // Loop over the shuffled index pairs
+    for (size_t i : indices1)
     {
-        for (size_t j = 0; j < pointsInCycle2; ++j)
+        for (size_t j : indices2)
         {
             double delta = 0;
             // Get all the neighbours of point 1
@@ -223,11 +248,18 @@ bool stepEdgeExchange(Solution &solution, const std::vector<std::vector<double>>
     }
     for (size_t c = 0; c < 2; ++c)
     {
-        // Loop over each pair of points in the solution
-        for (size_t i = 0; i < cycleSizes[c]; ++i)
+        // Create and shuffle index vector
+        std::vector<size_t> indices(cycleSizes[c]);
+        std::iota(indices.begin(), indices.end(), 0);
+        std::shuffle(indices.begin(), indices.end(), rng);
+
+        // Loop over shuffled pairs
+        for (size_t ii = 0; ii < indices.size(); ++ii)
         {
-            for (size_t j = 0; j < cycleSizes[c]; ++j) // Avoid reversing whole cycle
+            size_t i = indices[ii];
+            for (size_t jj = 0; jj < indices.size(); ++jj)
             {
+                size_t j = indices[jj];
                 // Skip reversing the entire cycle
                 if (i == j || (j + 1) % cycleSizes[c] == i || (j + 2) % cycleSizes[c] == i)
                 {
@@ -317,27 +349,6 @@ bool stepEdgeExchange(Solution &solution, const std::vector<std::vector<double>>
 
 Solution localSearchVertex(Solution solution, const std::vector<std::vector<double>> &distanceMatrix, const std::string &strategy)
 {
-    if (strategy == "greedy")
-    {
-        // Randomize the process slightly
-        std::random_device rd;
-        std::mt19937 rng(rd());
-
-        // Shuffle starting points for both cycles
-        for (int i = 0; i < 2; ++i)
-        {
-            if (!solution.cycleIndices[i].empty())
-            {
-                std::uniform_int_distribution<int> dist(0, solution.cycleIndices[i].size() - 1);
-                int randomIndex = dist(rng); // Pick a random index
-                // Rotate cycle to start from the chosen random index
-                std::rotate(solution.cycleIndices[i].begin(),
-                            solution.cycleIndices[i].begin() + randomIndex,
-                            solution.cycleIndices[i].end());
-            }
-        }
-    }
-
     bool improvement = true;
     while (improvement)
     {
@@ -349,27 +360,6 @@ Solution localSearchVertex(Solution solution, const std::vector<std::vector<doub
 
 Solution localSearchEdges(Solution solution, const std::vector<std::vector<double>> &distanceMatrix, const std::string &strategy)
 {
-    if (strategy == "greedy")
-    {
-        // Randomize the process slightly
-        std::random_device rd;
-        std::mt19937 rng(rd());
-
-        // Shuffle starting points for both cycles
-        for (int i = 0; i < 2; ++i)
-        {
-            if (!solution.cycleIndices[i].empty())
-            {
-                std::uniform_int_distribution<int> dist(0, solution.cycleIndices[i].size() - 1);
-                int randomIndex = dist(rng); // Pick a random index
-                // Rotate cycle to start from the chosen random index
-                std::rotate(solution.cycleIndices[i].begin(),
-                            solution.cycleIndices[i].begin() + randomIndex,
-                            solution.cycleIndices[i].end());
-            }
-        }
-    }
-
     bool improvement = true;
     while (improvement)
     {

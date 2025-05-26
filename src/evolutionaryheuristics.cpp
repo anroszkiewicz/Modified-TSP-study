@@ -23,7 +23,7 @@
 
 #define POPULATION_SIZE 20
 
-bool insertIntoPopulation(std::vector<Solution> &population, const Solution &child)
+bool insertIntoPopulation(std::vector<Solution> &population, const Solution &child, size_t MAX_POPULATION_SIZE = 10)
 {
     if (population.empty())
     {
@@ -35,7 +35,7 @@ bool insertIntoPopulation(std::vector<Solution> &population, const Solution &chi
     size_t pos = std::distance(population.begin(), it);
 
     // Too weak to be included
-    if (pos == population.size())
+    if (pos == MAX_POPULATION_SIZE)
         return false;
 
     if (pos == 0)
@@ -43,7 +43,7 @@ bool insertIntoPopulation(std::vector<Solution> &population, const Solution &chi
         if (child != population[0])
         {
             population.insert(it, child);
-            if (population.size() > POPULATION_SIZE)
+            if (population.size() > MAX_POPULATION_SIZE)
                 population.pop_back();
             return true;
         }
@@ -60,7 +60,7 @@ bool insertIntoPopulation(std::vector<Solution> &population, const Solution &chi
         if (diffPrev && diffNext)
         {
             population.insert(it, child);
-            if (population.size() > POPULATION_SIZE)
+            if (population.size() > MAX_POPULATION_SIZE)
                 population.pop_back();
             return true;
         }
@@ -282,14 +282,14 @@ Solution crossover(const Solution &parent1, const Solution &parent2, const std::
     return child;
 }
 
-Solution proposed_crossover(const Solution &parent1, const Solution &parent2, const std::vector<std::vector<double>> &distanceMatrix)
+Solution proposedCrossover(const Solution &parent1, const Solution &parent2, const std::vector<std::vector<double>> &distanceMatrix)
 {
     // choose parent at random
     int which_parent = std::rand() % 2;
     Solution solution;
     Solution other;
-    
-    if(which_parent == 0)
+
+    if (which_parent == 0)
     {
         solution = parent1;
         other = parent2;
@@ -304,39 +304,39 @@ Solution proposed_crossover(const Solution &parent1, const Solution &parent2, co
     std::vector<bool> toRemoveCycle1(solution.cycleIndices[0].size(), false);
     std::vector<bool> toRemoveCycle2(solution.cycleIndices[1].size(), false);
 
-    for (size_t i = 1; i < solution.cycleIndices[0].size(); i++)
+    for (int i = 1; i < static_cast<int>(solution.cycleIndices[0].size()); i++)
     {
-        std::vector<int> sequence = {i-1, i};
+        std::vector<int> sequence = {i - 1, i};
         auto it = std::search(other.cycleIndices[0].begin(), other.cycleIndices[0].end(), sequence.begin(), sequence.end());
 
         if (it == other.cycleIndices[0].end())
         {
-            toRemoveCycle1[i-1] = true;
+            toRemoveCycle1[i - 1] = true;
             toRemoveCycle1[i] = true;
         }
 
         it = std::search(other.cycleIndices[1].begin(), other.cycleIndices[1].end(), sequence.begin(), sequence.end());
         if (it == other.cycleIndices[1].end())
         {
-            toRemoveCycle1[i-1] = true;
+            toRemoveCycle1[i - 1] = true;
             toRemoveCycle1[i] = true;
         }
     }
 
-    for (size_t i = 1; i < solution.cycleIndices[1].size(); i++)
+    for (int i = 1; i < static_cast<int>(solution.cycleIndices[1].size()); i++)
     {
-        std::vector<int> sequence = {i-1, i};
+        std::vector<int> sequence = {i - 1, i};
         auto it = std::search(other.cycleIndices[0].begin(), other.cycleIndices[0].end(), sequence.begin(), sequence.end());
         if (it == other.cycleIndices[0].end())
         {
-            toRemoveCycle2[i-1] = true;
+            toRemoveCycle2[i - 1] = true;
             toRemoveCycle2[i] = true;
         }
 
         it = std::search(other.cycleIndices[1].begin(), other.cycleIndices[1].end(), sequence.begin(), sequence.end());
         if (it == other.cycleIndices[1].end())
         {
-            toRemoveCycle2[i-1] = true;
+            toRemoveCycle2[i - 1] = true;
             toRemoveCycle2[i] = true;
         }
     }
@@ -373,7 +373,7 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
         Solution x = randomCycle(distanceMatrix);
         x = localSearchMemory(x, distanceMatrix);
         x.calculateScore(distanceMatrix);
-        insertIntoPopulation(population, x);
+        insertIntoPopulation(population, x, POPULATION_SIZE);
     }
     auto t2 = std::chrono::high_resolution_clock::now();
     long runtime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
@@ -392,32 +392,23 @@ std::pair<Solution, int> evolutionaryAlgorithm(const std::vector<std::vector<dou
         {
             idx2 = std::rand() % POPULATION_SIZE;
         } while (idx1 == idx2);
-        std::cout<<"selected parents"<<std::endl;
 
         // Crossover
         Solution parent1 = population[idx1];
         Solution parent2 = population[idx2];
-        Solution child = proposed_crossover(parent1, parent2, distanceMatrix);
-        //Solution child;
-        std::cout<<"did crossover"<<std::endl;
-
-        // plotSolution(child, points, distanceMatrix, "Child");
+        Solution child = proposedCrossover(parent1, parent2, distanceMatrix);
 
         // Optional local search
         if (localSearch)
         {
             child = localSearchMemory(child, distanceMatrix);
-            // plotSolution(child, points, distanceMatrix, "Child after LS");
         }
-        std::cout<<"did localsearch"<<std::endl;
-
         child.calculateScore(distanceMatrix);
-        insertIntoPopulation(population, child);
-        std::cout<<"inserted child"<<std::endl;
+        insertIntoPopulation(population, child, POPULATION_SIZE);
         iterations++;
     }
-    std::cout<<iterations<<std::endl;
-    std::cout<<runtime<<std::endl;
+    std::cout << iterations << std::endl;
+    std::cout << runtime << std::endl;
 
     return std::make_pair(population.front(), iterations);
 }

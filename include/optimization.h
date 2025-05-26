@@ -23,6 +23,6 @@ Solution localSearchMemory(Solution solution, const std::vector<std::vector<doub
 
 std::vector<std::vector<int>> computeNearestneighbours(const std::vector<std::vector<double>> &distanceMatrix, int n);
 
-Solution localSearchCandidates(Solution solution, const std::vector<std::vector<double>> &distanceMatrix);
+Solution localSearchCandidates(Solution solution, const std::vector<std::vector<double>> &distanceMatrix, int neighbourhoodSize);
 
 #endif

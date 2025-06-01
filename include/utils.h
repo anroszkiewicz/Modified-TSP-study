@@ -15,6 +15,10 @@ void displayDistanceMatrix(const std::vector<std::vector<double>> &distanceMatri
 
 void plotSolution(Solution &solution, const std::vector<Point> &points, const std::vector<std::vector<double>> &distanceMatrix, const std::string &title);
 
+double mean(const std::vector<double>& v);
+
+double correlation(const std::vector<double>& x, const std::vector<double>& y);
+
 void plotSimilarity(std::vector<Solution> &solutions, std::vector<double> &similarities, const std::vector<std::vector<double>> &distanceMatrix, const std::string &title);
 
 #endif

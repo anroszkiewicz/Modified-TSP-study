@@ -156,6 +156,33 @@ void plotSolution(Solution &solution, const std::vector<Point> &points, const st
     plt::show();
 }
 
+double mean(const std::vector<double>& v)
+{
+    return std::accumulate(v.begin(), v.end(), 0.0) / v.size();
+}
+
+double correlation(const std::vector<double>& x, const std::vector<double>& y)
+{
+    if (x.size() != y.size() || x.empty()) return 0.0;
+
+    double mean_x = mean(x);
+    double mean_y = mean(y);
+
+    double numerator = 0.0;
+    double sum_sq_x = 0.0;
+    double sum_sq_y = 0.0;
+
+    for (size_t i = 0; i < x.size(); ++i) {
+        double dx = x[i] - mean_x;
+        double dy = y[i] - mean_y;
+        numerator += dx * dy;
+        sum_sq_x += dx * dx;
+        sum_sq_y += dy * dy;
+    }
+
+    return numerator / std::sqrt(sum_sq_x * sum_sq_y);
+}
+
 void plotSimilarity(std::vector<Solution> &solutions, std::vector<double> &similarities, const std::vector<std::vector<double>> &distanceMatrix, const std::string &title)
 {
     // Calculate distances
@@ -166,7 +193,20 @@ void plotSimilarity(std::vector<Solution> &solutions, std::vector<double> &simil
     }
 
     // Draw plot
-    plt::plot(scores, similarities);
+    plt::figure_size(1800, 1000);
+    plt::plot(scores, similarities, ".");
+    plt::scatter(scores, similarities);
+
+    double corr = correlation(scores, similarities);
+    std::cout << "CORRELATION" << std::endl;
+    std::cout << corr << std::endl << std::endl;
+
+    std::vector<double> xticks = {32000, 34000, 36000, 38000, 40000, 42000};
+    plt::xticks(xticks);
+
+    plt::grid(true);
+    plt::xlabel("Wartość funkcji celu rozwiązania");
+    plt::ylabel("Wartość miary podobieństwa");
     plt::title(title);
     plt::show();
 }

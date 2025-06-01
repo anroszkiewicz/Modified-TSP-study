@@ -151,8 +151,10 @@ void convex_test(Solution &goodSolution, std::vector<Solution> &solutions, const
     std::vector <double> average_similarities;
     int similarity_sum;
     double average;
+    std::cout << "Calculating similarity" << std::endl;
     for (int i = 0; i < static_cast<int>(solutions.size()); ++i)
     {
+        if (i % 100 == 0) std::cout << "Progress: " << i << "/1000" << std::endl;
         similarity_sum = 0;
         for (int j = 0; j < static_cast<int>(solutions.size()); ++j)
         {

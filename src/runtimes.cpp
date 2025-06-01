@@ -1352,13 +1352,16 @@ void convex_test_runtime(std::vector<Point> &points, std::vector<std::vector<dou
     int timeLimit = 5608;
     //int timeLimit = 6548;
 
+    std::cout << "Generating model solution" << std::endl;
     std::pair<Solution, int> result = freestyle(distanceMatrix, timeLimit);
     Solution goodSolution = result.first;
 
     // generate 1000 local optima
+    std::cout << "Generating 1000 solutions" << std::endl;
     std::vector <Solution> solutions;
     for(int i=0; i<1000; i++)
     {
+        if (i % 100 == 0) std::cout << "Progress: " << i << "/1000" << std::endl;
         Solution initialRandom = randomCycle(distanceMatrix);
         Solution localOptimum = localSearchEdges(initialRandom, distanceMatrix, "greedy");
         localOptimum.calculateScore(distanceMatrix);

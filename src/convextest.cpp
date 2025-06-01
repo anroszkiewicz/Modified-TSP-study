@@ -37,8 +37,7 @@ int commonVerticesMetric(Solution &a, Solution &b)
             }
         }
     }
-    int totalPairs = size * (size - 1) / 2;
-    return std::max(count, totalPairs - count);
+    return count;
 }
 
 int commonEdgesMetric(Solution &a, Solution &b)
@@ -98,7 +97,7 @@ void convexTest(Solution &goodSolution, std::vector<Solution> &solutions, const 
     plotSimilarity(solutions, similarities, distanceMatrix, title);
 
     // get average similarity betweens solutions
-    std::vector<double> averageSimilarities;
+    std::vector<double> averageimilarities;
     int similaritySum;
     double average;
     std::cout << "Calculating similarity" << std::endl;
@@ -117,7 +116,7 @@ void convexTest(Solution &goodSolution, std::vector<Solution> &solutions, const 
                 similaritySum = commonEdgesMetric(solutions[i], solutions[j]);
         }
         average = (double)similaritySum / 1000;
-        averageSimilarities.push_back(average);
+        averageimilarities.push_back(average);
     }
 
     // draw plot
@@ -126,5 +125,5 @@ void convexTest(Solution &goodSolution, std::vector<Solution> &solutions, const 
         title += ", miara wierzchołków";
     else
         title += ", miara krawędzi";
-    plotSimilarity(solutions, averageSimilarities, distanceMatrix, title);
+    plotSimilarity(solutions, averageimilarities, distanceMatrix, title);
 }

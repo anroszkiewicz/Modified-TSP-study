@@ -4,6 +4,8 @@
 #include <vector>
 #include <utility>
 
+bool point_in_cycle(int point, std::vector <int> &cycle);
+
 int common_vertices_metric(Solution &a, Solution &b);
 
 int common_edges_metric(Solution &a, Solution &b);

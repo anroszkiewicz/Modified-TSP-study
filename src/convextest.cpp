@@ -21,12 +21,7 @@
 #include "greedyheuristics.h"
 #include "evolutionaryheuristics.h"
 
-bool point_in_cycle(int point, std::vector<int> &cycle)
-{
-    return std::find(cycle.begin(), cycle.end(), point) != cycle.end();
-}
-
-int common_vertices_metric(Solution &a, Solution &b)
+int commonVerticesMetric(Solution &a, Solution &b)
 {
     int count = 0;
     size_t size = a.pointPositions.size();
@@ -42,10 +37,11 @@ int common_vertices_metric(Solution &a, Solution &b)
             }
         }
     }
-    return count;
+    int totalPairs = size * (size - 1) / 2;
+    return std::max(count, totalPairs - count);
 }
 
-int common_edges_metric(Solution &a, Solution &b)
+int commonEdgesMetric(Solution &a, Solution &b)
 {
     int count = 0;
     size_t pointsInCycle1 = a.cycleIndices[0].size();
@@ -59,7 +55,7 @@ int common_edges_metric(Solution &a, Solution &b)
             int current = a.cycleIndices[cycle][i];
             int neighbor = a.cycleIndices[cycle][(i - 1 + cycleSizes[cycle]) % cycleSizes[cycle]];
 
-            auto [cycleCurrent, positionCurrent] = a.getPointPosition(current);
+            auto [cycleCurrent, positionCurrent] = b.getPointPosition(current);
             auto [cycleNeighbor, positionNeigbor] = b.getPointPosition(neighbor);
 
             if (cycleCurrent == cycleNeighbor)
@@ -75,7 +71,7 @@ int common_edges_metric(Solution &a, Solution &b)
     return count;
 }
 
-void convex_test(Solution &goodSolution, std::vector<Solution> &solutions, const std::vector<std::vector<double>> &distanceMatrix, std::string metric = "vertices")
+void convexTest(Solution &goodSolution, std::vector<Solution> &solutions, const std::vector<std::vector<double>> &distanceMatrix, std::string metric = "vertices")
 {
     // sort solutions
     sort(solutions.begin(), solutions.end());
@@ -86,9 +82,9 @@ void convex_test(Solution &goodSolution, std::vector<Solution> &solutions, const
     for (int i = 0; i < static_cast<int>(solutions.size()); ++i)
     {
         if (metric == "vertices")
-            result = (double)common_vertices_metric(goodSolution, solutions[i]);
+            result = (double)commonVerticesMetric(goodSolution, solutions[i]);
         else
-            result = (double)common_edges_metric(goodSolution, solutions[i]);
+            result = (double)commonEdgesMetric(goodSolution, solutions[i]);
 
         similarities.push_back(result);
     }
@@ -102,26 +98,26 @@ void convex_test(Solution &goodSolution, std::vector<Solution> &solutions, const
     plotSimilarity(solutions, similarities, distanceMatrix, title);
 
     // get average similarity betweens solutions
-    std::vector<double> average_similarities;
-    int similarity_sum;
+    std::vector<double> averageSimilarities;
+    int similaritySum;
     double average;
     std::cout << "Calculating similarity" << std::endl;
     for (int i = 0; i < static_cast<int>(solutions.size()); ++i)
     {
         std::cout << "Progress: " << i << "/1000" << std::endl;
-        similarity_sum = 0;
+        similaritySum = 0;
         for (int j = 0; j < static_cast<int>(solutions.size()); ++j)
         {
             if (i == j)
                 continue;
 
             if (metric == "vertices")
-                similarity_sum += common_vertices_metric(solutions[i], solutions[j]);
+                similaritySum += commonVerticesMetric(solutions[i], solutions[j]);
             else
-                similarity_sum = common_edges_metric(solutions[i], solutions[j]);
+                similaritySum = commonEdgesMetric(solutions[i], solutions[j]);
         }
-        average = (double)similarity_sum / 1000;
-        average_similarities.push_back(average);
+        average = (double)similaritySum / 1000;
+        averageSimilarities.push_back(average);
     }
 
     // draw plot
@@ -130,5 +126,5 @@ void convex_test(Solution &goodSolution, std::vector<Solution> &solutions, const
         title += ", miara wierzchołków";
     else
         title += ", miara krawędzi";
-    plotSimilarity(solutions, average_similarities, distanceMatrix, title);
+    plotSimilarity(solutions, averageSimilarities, distanceMatrix, title);
 }

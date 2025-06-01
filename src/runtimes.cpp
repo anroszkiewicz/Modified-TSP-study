@@ -1119,7 +1119,7 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     plotSolution(bestEvolutionaryWithoutSolution, points, distanceMatrix, "Hybrid evolutionary algorithm without local search");
 }
 
-void lab5_heuristic(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
+void lab5Heuristic(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
     // int timeLimit = 5608;
     int timeLimit = 6548;
@@ -1163,7 +1163,7 @@ void lab5_heuristic(std::vector<Point> &points, std::vector<std::vector<double>>
     plotSolution(bestWeightedRegretCycleSolution, points, distanceMatrix, "RegretCycleWeighted");
 }
 
-void lab5_evolutionary(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
+void lab5Evolutionary(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
     int timeLimit = 5608;
     // int timeLimit = 6548;
@@ -1344,13 +1344,13 @@ void lab6(std::vector<Point> &points, std::vector<std::vector<double>> &distance
     plotSolution(bestSolution, points, distanceMatrix, "Freestyle");
 }
 
-void convex_test_runtime(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
+void convexTestRuntime(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     // generate one good solution
     int timeLimit = 5608;
-    //int timeLimit = 6548;
+    // int timeLimit = 6548;
 
     std::cout << "Generating model solution" << std::endl;
     std::pair<Solution, int> result = freestyle(distanceMatrix, timeLimit);
@@ -1358,10 +1358,11 @@ void convex_test_runtime(std::vector<Point> &points, std::vector<std::vector<dou
 
     // generate 1000 local optima
     std::cout << "Generating 1000 solutions" << std::endl;
-    std::vector <Solution> solutions;
-    for(int i=0; i<1000; i++)
+    std::vector<Solution> solutions;
+    for (int i = 0; i < 1000; i++)
     {
-        if (i % 100 == 0) std::cout << "Progress: " << i << "/1000" << std::endl;
+        if (i % 100 == 0)
+            std::cout << "Progress: " << i << "/1000" << std::endl;
         Solution initialRandom = randomCycle(distanceMatrix);
         Solution localOptimum = localSearchEdges(initialRandom, distanceMatrix, "greedy");
         localOptimum.calculateScore(distanceMatrix);
@@ -1369,6 +1370,6 @@ void convex_test_runtime(std::vector<Point> &points, std::vector<std::vector<dou
     }
 
     // perform tests
-    convex_test(goodSolution, solutions, distanceMatrix, "vertices");
-    convex_test(goodSolution, solutions, distanceMatrix, "edges");
+    convexTest(goodSolution, solutions, distanceMatrix, "vertices");
+    convexTest(goodSolution, solutions, distanceMatrix, "edges");
 }

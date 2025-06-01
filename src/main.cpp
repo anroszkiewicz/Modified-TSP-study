@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     // Create the adjacency list
     std::vector<std::vector<double>> distanceMatrix = createdistanceMatrix(points);
 
-    convex_test_runtime(points, distanceMatrix);
+    convexTestRuntime(points, distanceMatrix);
 
     return 0;
 }

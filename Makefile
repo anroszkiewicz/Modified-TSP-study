@@ -21,7 +21,7 @@ else
 endif
 
 CXX = g++
-CXXFLAGS = -Wall -std=c++17 -Iinclude -DWITHOUT_NUMPY $(PYTHON_CFLAGS)
+CXXFLAGS = -Wall -std=c++17 -Iinclude -DWITHOUT_NUMPY $(PYTHON_CFLAGS) -O3
 LDFLAGS  = $(PYTHON_LDFLAGS)
 
 SRC_DIR = src

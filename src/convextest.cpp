@@ -103,7 +103,10 @@ void convexTest(Solution &goodSolution, std::vector<Solution> &solutions, const 
     std::cout << "Calculating similarity" << std::endl;
     for (int i = 0; i < static_cast<int>(solutions.size()); ++i)
     {
-        std::cout << "Progress: " << i << "/1000" << std::endl;
+        if (i % 100 == 0)
+        {
+            std::cout << "Progress: " << i << "/1000" << std::endl;
+        }
         similaritySum = 0;
         for (int j = 0; j < static_cast<int>(solutions.size()); ++j)
         {
@@ -113,7 +116,7 @@ void convexTest(Solution &goodSolution, std::vector<Solution> &solutions, const 
             if (metric == "vertices")
                 similaritySum += commonVerticesMetric(solutions[i], solutions[j]);
             else
-                similaritySum = commonEdgesMetric(solutions[i], solutions[j]);
+                similaritySum += commonEdgesMetric(solutions[i], solutions[j]);
         }
         average = (double)similaritySum / 1000;
         averageimilarities.push_back(average);

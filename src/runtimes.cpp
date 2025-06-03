@@ -23,6 +23,23 @@
 #include "freestyle.h"
 #include "convextest.h"
 
+int getTimeLimit(int iterations, std::vector<std::vector<double>> &distanceMatrix)
+{
+    long totalMultipleStartTime = 0;
+
+    for (int i = 0; i < iterations; ++i)
+    {
+        auto t1 = std::chrono::high_resolution_clock::now();
+        Solution solution0 = multipleStartLocalSearch(distanceMatrix);
+        auto t2 = std::chrono::high_resolution_clock::now();
+
+        auto time0 = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        totalMultipleStartTime += time0;
+    }
+
+    return static_cast<int>(totalMultipleStartTime / iterations);
+}
+
 void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
     // Initialize variables for tracking scores
@@ -1121,8 +1138,7 @@ void lab5(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 
 void lab5Heuristic(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    // int timeLimit = 5608;
-    int timeLimit = 6548;
+    int timeLimit = getTimeLimit(10, distanceMatrix);
 
     double minWeightedRegretCycleScore = std::numeric_limits<double>::max();
     double maxWeightedRegretCycleScore = std::numeric_limits<double>::lowest();
@@ -1165,10 +1181,8 @@ void lab5Heuristic(std::vector<Point> &points, std::vector<std::vector<double>> 
 
 void lab5Evolutionary(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    int timeLimit = 5608;
-    // int timeLimit = 6548;
-
     int iterations = 10;
+    int timeLimit = getTimeLimit(iterations, distanceMatrix);
 
     // 5. Hybrid evolutionary algorithm
     double minEvolutionaryScore = std::numeric_limits<double>::max();
@@ -1291,9 +1305,8 @@ void lab5Evolutionary(std::vector<Point> &points, std::vector<std::vector<double
 
 void lab6(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
-    int timeLimit = 16174;
-
     int iterations = 10;
+    int timeLimit = getTimeLimit(iterations, distanceMatrix);
 
     double minScore = std::numeric_limits<double>::max();
     double maxScore = std::numeric_limits<double>::lowest();
@@ -1347,10 +1360,7 @@ void lab6(std::vector<Point> &points, std::vector<std::vector<double>> &distance
 void convexTestRuntime(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix)
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
-
-    // generate one good solution
-    int timeLimit = 5608;
-    // int timeLimit = 6548;
+    int timeLimit = getTimeLimit(10, distanceMatrix);
 
     std::cout << "Generating model solution" << std::endl;
     std::pair<Solution, int> result = freestyle(distanceMatrix, timeLimit);

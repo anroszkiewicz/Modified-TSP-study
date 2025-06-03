@@ -4,6 +4,8 @@
 #include <vector>
 #include "point.h"
 
+int getTimeLimit(int iterations, std::vector<std::vector<double>> &distanceMatrix);
+
 void lab1(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix);
 
 void lab2(std::vector<Point> &points, std::vector<std::vector<double>> &distanceMatrix);
